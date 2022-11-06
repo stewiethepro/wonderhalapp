@@ -1,0 +1,60 @@
+{
+  "triggerEvent":"BOOKING_CREATED",
+  "createdAt":"2022-08-22T10:19:00.478Z",
+  "payload":
+      {
+        "type":"Homeowner Intro",
+        "title":"Homeowner Intro between Team Hamlet and James McGill",
+        "description":"",
+        "additionalNotes":"",
+        "customInputs":{},
+        "startTime":"2022-08-23T23:30:00Z",
+        "endTime":"2022-08-24T00:00:00Z",
+        "organizer":
+          {
+            "name":"Team Hamlet",
+            "email":"hello@stayhamlet.com",
+            "timeZone":"Pacific/Auckland",
+            "language":{"locale":"en"}
+          },
+        "attendees":
+          [
+            {
+              "email":"petersloan1984@gmail.com",
+              "name":"James McGill",
+              "timeZone":"Pacific/Auckland",
+              "language":{"locale":"en"}
+            }
+          ],
+        "location":"integrations:daily",
+        "destinationCalendar":
+            {
+            "id":11548,
+            "integration":"google_calendar",
+            "externalId":"hello@stayhamlet.com",
+            "userId":null,
+            "eventTypeId":87545,
+            "credentialId":28847
+          },
+        "hideCalendarNotes":false,
+        "requiresConfirmation":false,
+        "eventTypeId":87545,
+        "uid":"wUtqM7VGU91so5nf89Q99m",
+        "conferenceData":
+            {
+            "createRequest":
+                {
+                "requestId":"2db644eb-37a5-581a-99fa-ebe6ce513834"
+              }
+          },
+        "videoCallData":
+            {
+            "type":"daily_video",
+            "id":"XGhBCrhSPg4pfOWXl8fd",
+            "password":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyIjoiWEdoQkNyaFNQZzRwZk9XWGw4ZmQiLCJvIjp0cnVlLCJkIjoiYmJkOThhNzEtMTljOS00YmIxLWE1YzUtY2FmMWVjNWJkMTA1IiwiaWF0IjoxNjYxMTYzNTM5fQ.sMZb9GN2Q6zqwwimeQ4ABvcZkCfEY-bh1CB0o3qf_4o",
+            "url":"https://meetco.daily.co/XGhBCrhSPg4pfOWXl8fd"
+          },
+        "bookingId":81124,
+        "metadata":{}
+      }
+}
