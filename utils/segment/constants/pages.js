@@ -27,8 +27,22 @@ export const pages = {
     },
     homes: {
         home: {
-            name: "Single Home",
-            category: "Homes Page",
+            apply: {
+                index: {
+                    name: "Home Apply",
+                    category: "Homes Page",
+                },
+                application: {
+                    index: {
+                        name: "Home Application Details",
+                        category: "Homes Page",
+                    },
+                },
+            },
+            index: {
+                name: "Single Home",
+                category: "Homes Page",
+            },
         },    
         index: {
             name: "All Homes",

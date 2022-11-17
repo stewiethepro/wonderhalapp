@@ -5,7 +5,6 @@ import * as Yup from "yup";
 import { Tab } from '@headlessui/react'
 import TextInput from '@/components/forms/inputs/TextInput';
 import ConditionalSelectMultipleInput from '@/components/forms/inputs/ConditionalSelectMultipleInput';
-import { PlusCircleIcon, MinusCircleIcon, ExclamationCircleIcon } from '@heroicons/react/outline'
 
 const locationsOptions = [
     { id: 1, value: 'Auckland', title: 'Auckland', description: '' },

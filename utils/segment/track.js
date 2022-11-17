@@ -179,3 +179,41 @@ export const trackResidentGroupMemberDeletedExistingResidentNotified = (eventTit
         }
     })
 }
+
+// Home Application Form submitted
+export const trackHomeApplicationFormSubmitted = (eventTitle, eventUserId, eventProperties) => {
+    analytics.track({
+        event: eventTitle,
+        userId: eventUserId,
+        properties: eventProperties,
+    })
+}
+
+// Home Application Submitted Notify Resident
+export const trackHomeApplicationSubmittedResidentNotified = (eventTitle, eventUserId, eventProperties) => {
+    analytics.track({
+        event: eventTitle,
+        userId: eventUserId,
+        properties: eventProperties,
+    })
+}
+
+// Home Application Deleted
+export const trackHomeApplicationDeleted = (eventTitle, eventUserId, eventProperties) => {
+    analytics.track({
+        event: eventTitle,
+        userId: eventUserId,
+        properties: eventProperties,
+    })
+}
+
+// Home Application Deleted Notify Resident
+export const trackHomeApplicationDeletedResidentNotified = (eventTitle, eventUserId, eventProperties) => {
+    analytics.track({
+        event: eventTitle,
+        userId: eventUserId,
+        properties: eventProperties,
+    })
+}
+
+

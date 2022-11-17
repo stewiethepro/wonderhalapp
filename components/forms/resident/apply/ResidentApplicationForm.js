@@ -13,7 +13,9 @@ import SoloStepSix from '@/components/forms/resident/apply/steps/solo/SoloStepSi
 import SoloStepSeven from '@/components/forms/resident/apply/steps/solo/SoloStepSeven'
 import SoloStepEight from '@/components/forms/resident/apply/steps/solo/SoloStepEight'
 import SoloStepNine from '@/components/forms/resident/apply/steps/solo/SoloStepNine'
+import SoloStepNinePets from '@/components/forms/resident/apply/steps/solo/SoloStepNinePets'
 import SoloStepTen from '@/components/forms/resident/apply/steps/solo/SoloStepTen'
+import SoloStepEleven from '@/components/forms/resident/apply/steps/solo/SoloStepEleven'
 // Group
 import GroupStepOne from '@/components/forms/resident/apply/steps/group/GroupStepOne'
 import GroupStepTwo from '@/components/forms/resident/apply/steps/group/GroupStepTwo'
@@ -24,10 +26,12 @@ import GroupStepSix from '@/components/forms/resident/apply/steps/group/GroupSte
 import GroupStepSeven from '@/components/forms/resident/apply/steps/group/GroupStepSeven'
 import GroupStepEight from '@/components/forms/resident/apply/steps/group/GroupStepEight'
 import GroupStepNine from '@/components/forms/resident/apply/steps/group/GroupStepNine'
+import GroupStepNinePets from '@/components/forms/resident/apply/steps/group/GroupStepNinePets'
+import GroupStepNineInvitedUser from '@/components/forms/resident/apply/steps/group/GroupStepNineInvitedUser'
 import GroupStepTen from '@/components/forms/resident/apply/steps/group/GroupStepTen'
-import GroupStepElevenInviteNow from '@/components/forms/resident/apply/steps/group/GroupStepElevenInviteNow'
-import GroupStepElevenInviteLater from '@/components/forms/resident/apply/steps/group/GroupStepElevenInviteLater'
+import GroupStepEleven from '@/components/forms/resident/apply/steps/group/GroupStepEleven'
 import GroupStepTwelve from '@/components/forms/resident/apply/steps/group/GroupStepTwelve'
+import GroupStepThirteen from '@/components/forms/resident/apply/steps/group/GroupStepThirteen'
 // NotInRegion
 import NotInRegionStepOne from '@/components/forms/resident/apply/steps/notInRegion/NotInRegionStepOne'
 import NotInRegionStepTwo from '@/components/forms/resident/apply/steps/notInRegion/NotInRegionStepTwo'
@@ -35,6 +39,8 @@ import NotInRegionStepTwo from '@/components/forms/resident/apply/steps/notInReg
 import DashboardHeader from '@/components/header/DashboardHeader'
 import { post } from '@/utils/api/request'
 import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvited } from '@/utils/segment/track'
+import SoloStepTest from './steps/solo/SoloStepTest'
+
 
   const data = {
     locations: [],
@@ -54,7 +60,7 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
       middleNames: "",
       lastName: "",
     },
-    birthday: "",
+    bio: "",
     legalName: false,
     changedName: false,
     group: false,
@@ -66,7 +72,16 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
       userExists: false,
       userId: null,
       userStatus: null,
+      userPets: null,
       budget: 0,
+    }],
+    hasPets: false,
+    pets: [{
+      name: "",
+      animal: "",
+      breed: "",
+      age: 0,
+      additionalInfo: "",
     }],
     invitedUser: false,
     residentGroupId: null,
@@ -100,7 +115,7 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
       middleNames: "",
       lastName: "",
     },
-    birthday: "",
+    bio: "",
     legalName: false,
     changedName: false,
     group: profileData.resident_group,
@@ -112,7 +127,16 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
       userExists: false,
       userId: null,
       userStatus: null,
+      userPets: null,
       budget: 0,
+    }],
+    hasPets: false,
+    pets: [{
+      name: "",
+      animal: "",
+      breed: "",
+      age: 0,
+      additionalInfo: "",
     }],
     invitedUser: profileData.resident_group,
     residentGroupId: null,
@@ -141,7 +165,7 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
 
   const [currentStep, setCurrentStep] = useState(0);
   
-  console.log(data);
+  console.log("data: ", data);
 
   function preparePayloads(formData, userId, userEmail) {
 
@@ -155,7 +179,8 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
         previous_first_name: formData.previousName.firstName,
         previous_middle_names: formData.previousName.middleNames,
         previous_last_name: formData.previousName.lastName,
-        birthday: formData.birthday,
+        bio: formData.bio,
+        pets: formData.hasPets,
         changed_name: formData.changedName,
         median_income: formData.medianIncome,
         median_savings: formData.medianSavings,
@@ -171,7 +196,8 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
         first_name: formData.name.firstName,
         last_name: formData.name.lastName,
         resident_group: formData.group,
-        birthday: formData.birthday,
+        bio: formData.bio,
+        pets: formData.hasPets,
         median_income: formData.medianIncome,
         median_savings: formData.medianSavings,
         income_after_tax: formData.incomeAfterTax,
@@ -186,6 +212,7 @@ import { trackFormSubmitted, trackNewResidentInvited, trackExistingResidentInvit
         email: userEmail,
         status: "pre-approved",
         budget: formData.budget,
+        pets: formData.hasPets,
       }
 
       const createResidentGroupPayload = {user_id: userId}
@@ -249,7 +276,8 @@ async function updateResidentGroupMember(residentGroupMemberId, residentGroupId,
             .from("resident_group_members")
             .update({ 
                 status: "pre-approved",
-                budget: formData.budget 
+                budget: formData.budget,
+                pets: formData.hasPets,
             })
             .eq('id', residentGroupMemberId)
             .eq('resident_group_id', residentGroupId)
@@ -321,8 +349,17 @@ async function checkResidentGroupStatus(residentGroupId) {
 
               let groupPreApproved = containsOnly(["pre-approved"], groupMemberStatus)
               console.log('groupPreApproved: ', groupPreApproved);
+              
+              let groupMemberPets = data.map((groupMember) => groupMember.pets)
+              console.log('groupMemberPets: ', groupMemberPets);
 
-              resolve(groupPreApproved)
+              let groupPets = !containsOnly([false], groupMemberPets)
+              console.log('groupPets: ', groupPets);
+
+              resolve({
+                groupPreApproved: groupPreApproved,
+                groupPets: groupPets,
+              })
             }
 
         } catch (error) {
@@ -333,11 +370,12 @@ async function checkResidentGroupStatus(residentGroupId) {
     })
 }
 
-async function updateResidentGroupStatus(groupApproved, residentGroupId) {
+async function updateResidentGroupStatus(groupApproved, groupPets, residentGroupId) {
     return new Promise(resolve => {
       (async () => {
         try {
             let groupStatus = ''
+            let groupHasPets = false
 
             if (groupApproved) {
                 groupStatus = 'pre-approved'
@@ -345,10 +383,19 @@ async function updateResidentGroupStatus(groupApproved, residentGroupId) {
                 groupStatus = 'not-approved'
             }
 
+            if (groupPets) {
+                groupHasPets = true
+            } else {
+                groupHasPets = false
+            }
+
             // Update resident group status
             const { data, error } = await supabase
             .from("resident_groups")
-            .update({ status: groupStatus })
+            .update({ 
+              status: groupStatus, 
+              pets: groupHasPets, 
+            })
             .eq('id', residentGroupId)
 
             if (error) {
@@ -366,6 +413,7 @@ async function updateResidentGroupStatus(groupApproved, residentGroupId) {
       })()
     })
 }
+
 
 async function updateProfile(profilePayload, userId) {
     return new Promise(resolve => {
@@ -426,6 +474,7 @@ function prepareFlatmatesPayloads(inviteNow, formData, userId, primaryResidentGr
                 last_name: flatmate.lastName,
                 email: flatmate.email,
                 status: (flatmate.userExists ? flatmate.userStatus : "invited"),
+                pets: (flatmate.userExists ? flatmate.userPets : false),
                 invited_by: userId,
                 budget: flatmate.budget,
             }
@@ -515,6 +564,51 @@ async function updateExistingUserProfiles(existingResidentGroupMembers) {
         }
       })()
     })
+}
+
+function preparePetsPayload(formData, profileData) {
+
+  let pets = []
+  
+  pets = formData.pets.map((pet) => (
+        {
+            animal: pet.animal,
+            name: pet.name,
+            breed: pet.breed,
+            age: pet.age,
+            additional_info: pet.additionalInfo,
+            user_id: profileData.id,
+        } 
+  ))
+
+  return pets
+  
+}
+
+async function createPets(petsPayload) {
+  return new Promise(resolve => {
+    (async () => {
+      try {
+          const { data, error } = await supabase
+          .from("pets")
+          .insert(
+            petsPayload
+          )
+
+          if (error) {
+            console.log("Supabase error:", error)
+            resolve("Supabase error:", error)
+          } else {
+            console.log("pets: ", data);
+            resolve(data)
+          }
+
+      } catch (error) {
+          console.log("API error: ", error);
+          resolve(error)
+      }
+    })()
+  })
 }
 
 async function sendNotifications(userId, userEmail, profileData, newResidentGroupMembers, existingResidentGroupMembers) {
@@ -666,19 +760,21 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                           resolve(error)
                       }
             
-                      let groupApproved = false
+                      let groupIsApproved = false
+                      let groupHasPets = false
           
                       try {
-                          const result4 = await checkResidentGroupStatus(residentGroupMemberData.resident_group_id);
-                          console.log("result4: ", result4);
-                          groupApproved = result4
+                          const {groupPreApproved, groupPets} = await checkResidentGroupStatus(residentGroupMemberData.resident_group_id);
+                          console.log(groupPreApproved, groupPets);
+                          groupIsApproved = groupPreApproved
+                          groupHasPets = groupPets
                       } catch (error) {
                           console.log("error: ", error);
                           resolve(error)
                       }
             
                       try {
-                          const result5 = await updateResidentGroupStatus(groupApproved, residentGroupMemberData.resident_group_id);
+                          const result5 = await updateResidentGroupStatus(groupIsApproved, groupHasPets, residentGroupMemberData.resident_group_id);
                           console.log("result5: ", result5);
                       } catch (error) {
                           console.log("error: ", error);
@@ -691,6 +787,22 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                       } catch (error) {
                           console.log("error: ", error);
                           resolve(error)
+                      }
+
+                      if (formData.hasPets) {
+                        // Has pets
+                        const pets = preparePetsPayload(formData, profileData);
+
+                        console.log(pets);
+
+                        try {
+                            const result7 = await createPets(pets)
+                            console.log("result7: ", result7);
+                        } catch (error) {
+                            console.log("error: ", error);
+                            resolve(error)
+                        }
+
                       }
 
                   } else if (formData.inviteNow) {
@@ -750,19 +862,21 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                           resolve(error)
                       }
             
-                      let groupApproved = false
+                      let groupIsApproved = false
+                      let groupHasPets = false
           
                       try {
-                          const result5 = await checkResidentGroupStatus(createdResidentGroup);
-                          console.log("result5: ", result5);
-                          groupApproved = result5
+                          const {groupPreApproved, groupPets} = await checkResidentGroupStatus(createdResidentGroup);
+                          console.log(groupPreApproved, groupPets);
+                          groupIsApproved = groupPreApproved
+                          groupHasPets = groupPets
                       } catch (error) {
                           console.log("error: ", error);
                           resolve(error)
                       }
             
                       try {
-                          const result6 = await updateResidentGroupStatus(groupApproved, createdResidentGroup);
+                          const result6 = await updateResidentGroupStatus(groupIsApproved, groupHasPets, createdResidentGroup);
                           console.log("result6: ", result6);
                       } catch (error) {
                           console.log("error: ", error);
@@ -791,6 +905,22 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                       } catch (error) {
                           console.log("error: ", error);
                           resolve(error)
+                      }
+
+                      if (formData.hasPets) {
+                        // Has pets
+                        const pets = preparePetsPayload(formData, profileData);
+
+                        console.log(pets);
+
+                        try {
+                            const result10 = await createPets(pets)
+                            console.log("result10: ", result10);
+                        } catch (error) {
+                            console.log("error: ", error);
+                            resolve(error)
+                        }
+
                       }
 
                   } else {
@@ -850,19 +980,21 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                           resolve(error)
                       }
             
-                      let groupApproved = false
+                      let groupIsApproved = false
+                      let groupHasPets = false
           
                       try {
-                          const result5 = await checkResidentGroupStatus(createdResidentGroup);
-                          console.log("result5: ", result5);
-                          groupApproved = result5
+                          const {groupPreApproved, groupPets} = await checkResidentGroupStatus(createdResidentGroup);
+                          console.log(groupPreApproved, groupPets);
+                          groupIsApproved = groupPreApproved
+                          groupHasPets = groupPets
                       } catch (error) {
                           console.log("error: ", error);
                           resolve(error)
                       }
             
                       try {
-                          const result6 = await updateResidentGroupStatus(groupApproved, createdResidentGroup);
+                          const result6 = await updateResidentGroupStatus(groupIsApproved, groupHasPets, createdResidentGroup);
                           console.log("result6: ", result6);
                       } catch (error) {
                           console.log("error: ", error);
@@ -875,6 +1007,22 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                       } catch (error) {
                           console.log("error: ", error);
                           resolve(error)
+                      }
+
+                      if (formData.hasPets) {
+                        // Has pets
+                        const pets = preparePetsPayload(formData, profileData);
+
+                        console.log(pets);
+
+                        try {
+                            const result8 = await createPets(pets)
+                            console.log("result8: ", result8);
+                        } catch (error) {
+                            console.log("error: ", error);
+                            resolve(error)
+                        }
+
                       }
 
                   }
@@ -897,6 +1045,22 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                   } catch (error) {
                       console.log("error: ", error);
                       resolve(error)
+                  }
+
+                  if (formData.hasPets) {
+                    // Has pets
+                    const pets = preparePetsPayload(formData, profileData);
+
+                    console.log(pets);
+
+                    try {
+                        const result3 = await createPets(pets)
+                        console.log("result3: ", result3);
+                    } catch (error) {
+                        console.log("error: ", error);
+                        resolve(error)
+                    }
+
                   }
 
               }
@@ -1010,297 +1174,181 @@ async function handleFormSubmit(formData, userId, userEmail, profileData, reside
     setData((prev) => ({...prev, ...newData}));
     setCurrentStep((prev) => prev - 1)
   }
-  
-  const stepsSolo = [
-    <SoloStepOne next={handleNextStep} data={data}/>, 
-    <SoloStepTwo next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepThree next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepFour next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepFive next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepSix next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepSeven next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepEight next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepNine next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <SoloStepTen next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>,
-  ]
-  const stepsGroupInvitedUser = [
-    <GroupStepOne next={handleNextStep} data={data}/>, 
-    <GroupStepTwo next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepThree next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepFour next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepFive next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepSix next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepSeven next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepNine next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepTwelve next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>,
-  ]
-  const stepsGroupInviteNow = [
-    <GroupStepOne next={handleNextStep} data={data}/>, 
-    <GroupStepTwo next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepThree next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepFour next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepFive next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepSix next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepSeven next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepEight next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepNine next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepTen next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepElevenInviteNow next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepTwelve next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>,
-  ]
-  const stepsGroupInviteLater = [
-    <GroupStepOne next={handleNextStep} data={data}/>, 
-    <GroupStepTwo next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepThree next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepFour next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepFive next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepSix next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepSeven next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepEight next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepNine next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepTen next={handleNextStep} prev={handlePrevStep} data={data}/>,
-    <GroupStepElevenInviteLater next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>,
-  ]
-  const stepsNotInRegion = [
-    <NotInRegionStepOne next={handleNextStep} data={data}/>, 
-    <NotInRegionStepTwo next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>, 
+
+  const steps = [
+    <SoloStepOne next={handleNextStep} data={data}/>,
+    ... !data.locations.includes('Auckland') && data.locations.length !== 0 ? 
+      [
+        <NotInRegionStepTwo next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>, 
+      ] 
+      : 
+      [
+        <SoloStepTwo next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        <SoloStepThree next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        <SoloStepFour next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        <SoloStepFive next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        <SoloStepSix next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        <SoloStepSeven next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        <SoloStepEight next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        ... data.hasPets ? 
+          [
+            <SoloStepNinePets next={handleNextStep} prev={handlePrevStep} data={data}/>,
+          ]
+          :
+          [],
+        ... data.invitedUser ? 
+        [
+          <SoloStepTen next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>,
+        ]
+        :
+        [
+          <SoloStepNine next={handleNextStep} prev={handlePrevStep} data={data}/>,
+        ... data.group ? 
+          [
+            <GroupStepNine next={handleNextStep} prev={handlePrevStep} data={data}/>,
+            <GroupStepEleven next={handleNextStep} prev={handlePrevStep} data={data}/>,
+            ... data.inviteNow ? 
+              [
+                <GroupStepTwelve next={handleNextStep} prev={handlePrevStep} data={data}/>,
+              ]
+              :
+              [],
+            <GroupStepThirteen next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>,
+          ]
+          :
+          [
+            <SoloStepTen next={handleNextStep} prev={handlePrevStep} data={data} submitting={submitting}/>,
+          ],
+        ],
+      ], 
   ]
 
-  const soloHeaderContent = [
-    {
-      title: "Step 1 of 10", 
-      main: "Location",
-      description: "Where are you looking to rent a home?",
-    },
-    {
-      title: "Step 2 of 10", 
-      main: "Hamlet operates in Auckland",
-      description: (typeof data.locations === "undefined" ? null : (checkLocations().auckland ? (checkLocations().otherRegions.length > 0 ? "We serve Auckland but sadly we aren't in " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet."  : "Good news, we cover all of Auckland!") : "Sorry, we don't serve " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet.")), 
-    },
-    {
-      title: "Step 3 of 10", 
-      main: "Annual income",
-      description: "We will use this figure to pre-approve you for a specific rental budget and won't ask you for proof of funds until you have a home lined up.",
-    },
-    {
-      title: "Step 4 of 10", 
-      main: "Savings",
-      description: "If you have any savings let us know, we'll factor them into the calculation when we pre-approve your rental budget.",
-    },
-    {
-      title: "Step 5 of 10", 
-      main: "Legal Name",
-      description: "Please enter your full legal name and check the box below.",
-    },
-    {
-      title: "Step 6 of 10", 
-      main: "Changed name",
-      description: "Have you ever changed your name in the past?",
-    },
-    {
-      title: "Step 7 of 10", 
-      main: "Date of birth",
-      description: "When were you born?",
-    },
-    {
-      title: "Step 8 of 10", 
-      main: "Group",
-      description: "Will you be renting on your own or with others?",
-    },
-    {
-      title: "Step 9 of 10", 
-      main: "Nice one!",
-      description: "You've been pre-approved 🎉 🥳",
-    },
-    {
-      title: "Step 10 of 10", 
-      main: "Book a call",
-      description: "Chat with the Hamlet team.",
-    },
-  ]
+  const headerTitle = "Step " + (currentStep + 1) + " of " + steps.length
 
-  const groupInvitedUserHeaderContent = [
+  const headerContent = [
     {
-      title: "Step 1 of 9", 
+      title: headerTitle, 
       main: "Location",
       description: "Where are you looking to rent a home?",
     },
-    {
-      title: "Step 2 of 9", 
-      main: "Hamlet operates in Auckland",
-      description: (typeof data.locations === "undefined" ? null : (checkLocations().auckland ? (checkLocations().otherRegions.length > 0 ? "We serve Auckland but sadly we aren't in " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet."  : "Good news, we cover all of Auckland!") : "Sorry, we don't serve " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet.")), 
-    },
-    {
-      title: "Step 3 of 9", 
-      main: "Annual income",
-      description: "We will use this figure to pre-approve you for a specific rental budget and won't ask you for proof of funds until you have a home lined up.",
-    },
-    {
-      title: "Step 4 of 9", 
-      main: "Savings",
-      description: "If you have any savings let us know, we'll factor them into the calculation when we pre-approve your rental budget.",
-    },
-    {
-      title: "Step 5 of 9", 
-      main: "Legal Name",
-      description: "Please enter your full legal name and check the box below.",
-    },
-    {
-      title: "Step 6 of 9", 
-      main: "Changed name",
-      description: "Have you ever changed your name in the past?",
-    },
-    {
-      title: "Step 7 of 9", 
-      main: "Date of birth",
-      description: "When were you born?",
-    },
-    {
-      title: "Step 8 of 9", 
-      main: "Nice one!",
-      description: "You've been pre-approved 🎉 🥳",
-    },
-    {
-      title: "Step 9 of 9", 
-      main: "Book a call",
-      description: "Chat with the Hamlet team.",
-    },
-  ]
-
-  const groupInviteLaterHeaderContent = [
-    {
-      title: "Step 1 of 11", 
-      main: "Location",
-      description: "Where are you looking to rent a home?",
-    },
-    {
-      title: "Step 2 of 11", 
-      main: "Hamlet operates in Auckland",
-      description: (typeof data.locations === "undefined" ? null : (checkLocations().auckland ? (checkLocations().otherRegions.length > 0 ? "We serve Auckland but sadly we aren't in " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet."  : "Good news, we cover all of Auckland!") : "Sorry, we don't serve " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet.")), 
-    },
-    {
-      title: "Step 3 of 11", 
-      main: "Annual income",
-      description: "We will use this figure to pre-approve you for a specific rental budget and won't ask you for proof of funds until you have a home lined up.",
-    },
-    {
-      title: "Step 4 of 11", 
-      main: "Savings",
-      description: "If you have any savings let us know, we'll factor them into the calculation when we pre-approve your rental budget.",
-    },
-    {
-      title: "Step 5 of 11", 
-      main: "Legal Name",
-      description: "Please enter your full legal name and check the box below.",
-    },
-    {
-      title: "Step 6 of 11", 
-      main: "Changed name",
-      description: "Have you ever changed your name in the past?",
-    },
-    {
-      title: "Step 7 of 11", 
-      main: "Date of birth",
-      description: "When were you born?",
-    },
-    {
-      title: "Step 8 of 11", 
-      main: "Group",
-      description: "Will you be renting on your own or with others?",
-    },
-    {
-      title: "Step 9 of 11", 
-      main: "Nice one!",
-      description: "You've been pre-approved 🎉 🥳",
-    },
-    {
-      title: "Step 10 of 11", 
-      main: "Invite your flatmate(s)",
-      description: "Once your flatmates have signed up, we will update the pre-approval amount for the group as a whole.",
-    },
-    {
-      title: "Step 11 of 11", 
-      main: "Book a call",
-      description: "No problem, you can invite your flatmates from the 'Resident Group' page in the Hamlet app.",
-    },
-  ]
-  const groupInviteNowHeaderContent = [
-    {
-      title: "Step 1 of 12", 
-      main: "Location",
-      description: "Where are you looking to rent a home?",
-    },
-    {
-      title: "Step 2 of 12", 
-      main: "Hamlet operates in Auckland",
-      description: (typeof data.locations === "undefined" ? null : (checkLocations().auckland ? (checkLocations().otherRegions.length > 0 ? "We serve Auckland but sadly we aren't in " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet."  : "Good news, we cover all of Auckland!") : "Sorry, we don't serve " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet.")), 
-    },
-    {
-      title: "Step 3 of 12", 
-      main: "Annual income",
-      description: "We will use this figure to pre-approve you for a specific rental budget and won't ask you for proof of funds until you have a home lined up.",
-    },
-    {
-      title: "Step 4 of 12", 
-      main: "Savings",
-      description: "If you have any savings let us know, we'll factor them into the calculation when we pre-approve your rental budget.",
-    },
-    {
-      title: "Step 5 of 12", 
-      main: "Legal Name",
-      description: "Please enter your full legal name and check the box below.",
-    },
-    {
-      title: "Step 6 of 12", 
-      main: "Changed name",
-      description: "Have you ever changed your name in the past?",
-    },
-    {
-      title: "Step 7 of 12", 
-      main: "Date of birth",
-      description: "When were you born?",
-    },
-    {
-      title: "Step 8 of 12", 
-      main: "Group",
-      description: "Will you be renting on your own or with others?",
-    },
-    {
-      title: "Step 9 of 12", 
-      main: "Nice one!",
-      description: "You've been pre-approved 🎉 🥳",
-    },
-    {
-      title: "Step 10 of 12", 
-      main: "Invite your flatmate(s)",
-      description: "Once your flatmates have signed up, we will update the pre-approval amount for the group as a whole.",
-    },
-    {
-      title: "Step 11 of 12", 
-      main: "Invite your flatmate(s)",
-      description: "Enter in your flatmate(s) emails below to send them an invite.",
-    },
-    {
-      title: "Step 12 of 12", 
-      main: "Book a call",
-      description: 
-      (typeof data.flatmates === "undefined" ? null : "Thanks for that. " 
-      + (checkFlatmates().existingUsers.length > 0 ? "Looks like " + checkFlatmates().existingUsers.map((firstName) => firstName).join(', ').replace(/,(?!.*,)/gmi, ' and ') + (checkFlatmates().existingUsers.length > 1 ? " have " : " has " ) + "already signed up, we'll add them to your group. " : "" )
-      + (checkFlatmates().newUsers.length > 0 ? "We'll send " + checkFlatmates().newUsers.map((firstName) => firstName).join(', ').replace(/,(?!.*,)/gmi, ' and ') + " an email with a link to join Hamlet." : "" )
-      ),
-    },
-  ]
-  const notInRegionHeaderContent = [
-    {
-      title: "Step 1 of 2", 
-      main: "Location",
-      description: "Where are you looking to rent a home?",
-    },
-    {
-      title: "Step 2 of 2",
-      main: "Hamlet operates in Auckland",
-      description: (typeof data.locations === "undefined" ? "" : (checkLocations().auckland ? (checkLocations().otherRegions.length > 0 ? "We serve Auckland but sadly we aren't in " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet."  : "Good news, we cover all of Auckland!") : "Sorry, we don't serve " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet.")), 
-    },
+    ... !data.locations.includes('Auckland') ? 
+      [
+        {
+          title: headerTitle,
+          main: "Hamlet operates in Auckland",
+          description: (typeof data.locations === "undefined" ? "" : (checkLocations().auckland ? (checkLocations().otherRegions.length > 0 ? "We serve Auckland but sadly we aren't in " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet."  : "Good news, we cover all of Auckland!") : "Sorry, we don't serve " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet.")), 
+        }, 
+      ] 
+      : 
+      [
+        {
+          title: headerTitle,
+          main: "Hamlet operates in Auckland",
+          description: (typeof data.locations === "undefined" ? null : (checkLocations().auckland ? (checkLocations().otherRegions.length > 0 ? "We serve Auckland but sadly we aren't in " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet."  : "Good news, we cover all of Auckland!") : "Sorry, we don't serve " + checkLocations().otherRegions.map((region) => region).join(', ').replace(/,(?!.*,)/gmi, ' or ') + " yet.")), 
+        },
+        {
+          title: headerTitle,
+          main: "Annual income",
+          description: "We will use this figure to pre-approve you for a specific rental budget and won't ask you for proof of funds until you have a home lined up.",
+        },
+        {
+          title: headerTitle,
+          main: "Savings",
+          description: "If you have any savings let us know, we'll factor them into the calculation when we pre-approve your rental budget.",
+        },
+        {
+          title: headerTitle,
+          main: "Legal Name",
+          description: "Please enter your full legal name and check the box below.",
+        },
+        {
+          title: headerTitle,
+          main: "Changed name",
+          description: "Have you ever changed your name in the past?",
+        },
+        {
+          title: headerTitle,
+          main: "Bio",
+          description: "Tell us a little bit about yourself (at least 150 characters)",
+        },
+        {
+          title: headerTitle,
+          main: "Pets",
+          description: "Do you have any pets?",
+        },
+        ... data.hasPets ? 
+          [
+            {
+              title: headerTitle, 
+              main: "Pets",
+              description: "Tell us more about your pets",
+            },
+          ]
+          :
+          [],
+        ... data.invitedUser ? 
+          [
+            {
+              title: headerTitle,  
+              main: "Nice one!",
+              description: "You've been pre-approved 🎉 🥳",
+            },
+          ]
+          :
+          [
+            {
+              title: headerTitle, 
+              main: "Group",
+              description: "Will you be renting on your own or with others?",
+            },
+          ... data.group ? 
+            [
+              {
+                title: headerTitle,
+                main: "Nice one!",
+                description: "You've been pre-approved 🎉 🥳",
+              },
+              {
+                title: headerTitle,
+                main: "Invite your flatmate(s)",
+                description: "Once your flatmates have signed up, we will update the pre-approval amount for the group as a whole.",
+              },
+              ... data.inviteNow ? 
+                [
+                  {
+                    title: headerTitle,
+                    main: "Invite your flatmate(s)",
+                    description: "Enter in your flatmate(s) emails below to send them an invite.",
+                  },
+                  {
+                    title: headerTitle,
+                    main: "All done!",
+                    description: 
+                    (typeof data.flatmates === "undefined" ? null : "Thanks for that. " 
+                    + (checkFlatmates().existingUsers.length > 0 ? "Looks like " + checkFlatmates().existingUsers.map((firstName) => firstName).join(', ').replace(/,(?!.*,)/gmi, ' and ') + (checkFlatmates().existingUsers.length > 1 ? " have " : " has " ) + "already signed up, we'll add them to your group. " : "" )
+                    + (checkFlatmates().newUsers.length > 0 ? "We'll send " + checkFlatmates().newUsers.map((firstName) => firstName).join(', ').replace(/,(?!.*,)/gmi, ' and ') + " an email with a link to join Hamlet." : "" )
+                    ),
+                  },
+                ]
+                :
+                [
+                  {
+                    title: headerTitle, 
+                    main: "All done!",
+                    description: "No problem, you can invite your flatmates from the 'Resident Group' page in the Hamlet app.",
+                  },
+                ],
+            ]
+            :
+            [
+              {
+                title: headerTitle, 
+                main: "All done!",
+                description: "You've been pre-approved 🎉 🥳",
+              },
+            ],
+          ],
+      ], 
   ]
 
   const primaryCard = [
@@ -1376,6 +1424,18 @@ async function handleFormSubmit(formData, userId, userEmail, profileData, reside
       imageAlt: 'Collection of four insulated travel bottles on wooden shelf.',
       color: 'teal-500',
     },
+    {
+      id: "step-thirteen-image",
+      imageSrc: 'https://cijtrwqqphdofjmlvaee.supabase.co/storage/v1/object/public/public/people/pexels-jack-krzysik-6611628.jpg',
+      imageAlt: 'Collection of four insulated travel bottles on wooden shelf.',
+      color: 'teal-500',
+    },
+    {
+      id: "step-fourteen-image",
+      imageSrc: 'https://cijtrwqqphdofjmlvaee.supabase.co/storage/v1/object/public/public/people/pexels-jack-krzysik-6611628.jpg',
+      imageAlt: 'Collection of four insulated travel bottles on wooden shelf.',
+      color: 'teal-500',
+    },
   ]
   
       return (
@@ -1392,74 +1452,10 @@ async function handleFormSubmit(formData, userId, userEmail, profileData, reside
                     <div>
                       <div className="mt-6 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:gap-8">
                         <div>
-                        {((data.locations.includes('Auckland')) || (data.locations.length === 0)) ? 
-                          <>
-                          {(data.invitedUser) ? 
-                          <>
-                          <DashboardHeader headerContent={groupInvitedUserHeaderContent[currentStep]} />
-                          </>
-                          :
-                          <>
-                          {(data.group) ?
-                          <>
-                          {(data.inviteNow) ?
-                          <>
-                          <DashboardHeader headerContent={groupInviteNowHeaderContent[currentStep]} />
-                          </>
-                          :
-                          <>
-                          <DashboardHeader headerContent={groupInviteLaterHeaderContent[currentStep]}/>
-                          </>
-                          }
-                          </>
-                          :
-                          <>
-                          <DashboardHeader headerContent={soloHeaderContent[currentStep]} />
-                          </>
-                          }
-                          </>
-                          }
-                          </>
-                          :
-                          <> 
-                          <DashboardHeader headerContent={notInRegionHeaderContent[currentStep]} />
-                          </>
-                        }
+                        <DashboardHeader headerContent={headerContent[currentStep]} />
                           <div className="w-full max-w-sm lg:w-96">
                               <div className='form-wrapper'>
-                              {((data.locations.includes('Auckland')) || (data.locations.length === 0)) ? 
-                              <>
-                              {(data.invitedUser) ? 
-                              <>
-                              {stepsGroupInvitedUser[currentStep]}
-                              </>
-                              :
-                              <>
-                              {(data.group) ?
-                                <> 
-                                {(data.inviteNow) ?
-                                <>
-                                {stepsGroupInviteNow[currentStep]}
-                                </>
-                                :
-                                <>
-                                {stepsGroupInviteLater[currentStep]}
-                                </>
-                                }
-                                </>
-                                : 
-                                <>
-                                {stepsSolo[currentStep]} 
-                                </>
-                              }
-                              </>
-                              }
-                              </>
-                              :
-                              <> 
-                              {stepsNotInRegion[currentStep]}
-                              </>
-                              }
+                                {steps[currentStep]}
                               </div>
                           </div>
                         </div>

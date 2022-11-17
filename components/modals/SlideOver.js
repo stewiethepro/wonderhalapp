@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
-export default function Example({ title, description, open, onClose, children }) {
+export default function SlideOver({ title, description, open, onClose, children }) {
   const [open, setOpen] = useState(false)
 
   return (

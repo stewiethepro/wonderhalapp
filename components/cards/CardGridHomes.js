@@ -1,10 +1,19 @@
 import Link from "next/link";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 
-  export default function CardGridHomes({data}) {
+  export default function CardGridHomes({data, homeApplications}) {
     
     const homes = data
+    const homesAppliedTo = homeApplications.map(homeApplication => homeApplication.home_id)
+
+    console.log("homesAppliedTo :", homesAppliedTo);
+
+    homes.map((home) => {
+      homesAppliedTo.includes(home.id) ? home.hasApplied = true : home.hasApplied = false
+    })
 
     console.log(data);
+    console.log("homes: ", homes);
 
   return (
       <>
@@ -32,6 +41,12 @@ import Link from "next/link";
                   </a>
                   </Link>
                 </h3>
+                {home.hasApplied &&
+                  <div className="mt-2 flex items-center text-sm text-green-500">
+                    <CheckCircleIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-green-400" aria-hidden="true" />
+                    Applied
+                  </div>
+                }
                 <p className="text-sm text-gray-900">{home.options}</p>
                 <p className="text-sm text-gray-500">{home.summary}</p>
                 <div className="flex-1 flex flex-col justify-end">

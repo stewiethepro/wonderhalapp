@@ -12,6 +12,7 @@ import {
   ChevronDownIcon,
   DocumentDuplicateIcon,
   HeartIcon,
+  HandThumbUpIcon,
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,

@@ -59,15 +59,15 @@ export const getServerSideProps = withPageAuth({
           {name: "Homes", href: "/homes", current: false},
         ],
         userNavigation: [
-            {name: "Profile", href: "/profile", onClick: "#"},
+            {name: "My account", href: "/account", onClick: "#"},
             {name: "Settings", href: "/settings", onClick: "#"},
         ],
     }
 
       const headerContent = {
         title: "Hamlet intro", 
-        main: "Book a video call",
-        description: "Pick a date and time that work for you.",
+        main: "Book an optional video call",
+        description: "If you have the time we'd love to meet you.",
       }
 
       return { props: { data, navData, headerContent } };

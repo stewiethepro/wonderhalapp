@@ -32,7 +32,10 @@ const handler = async (req, res) => {
     // Calculate median savings
 
     function calculateSavings(savings){
-        if (savings !== "None") {
+        if ((savings === "" || savings === "None")) {
+            let medianSavings = 0
+            return medianSavings
+        } else {
             let newSavings = savings
             .replace(/\$/g,'')
             .replace(/,/g,'')
@@ -42,13 +45,11 @@ const handler = async (req, res) => {
             let maxSavings = parseInt(newSavings[1], 10)
             let medianSavings = (minSavings + maxSavings) / 2
             return medianSavings
-        } else {
-            let medianSavings = 0
-            return medianSavings
         }
     }
 
     const medianSavings = calculateSavings(savings)
+    console.log("medianSavings: ", medianSavings);
 
     // Define NZ tax brackets
     

@@ -17,13 +17,14 @@ export default function TextInput( props ) {
           {...field}
           {...props}
           type={props.type}
+          value={props.value}
           className={`mt-1 block w-full px-3 py-2 bg-white border rounded-md text-sm shadow-sm placeholder-slate-400 focus:ring-1 focus:outline-none
           ${meta.error && meta.touched ? 
             'border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500' 
             : 
             'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500'
           }`}
-          />
+        />
         {meta.error && meta.touched && <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
           <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" />
         </div>}

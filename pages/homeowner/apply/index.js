@@ -67,7 +67,7 @@ export const getServerSideProps = withPageAuth({
             {name: "Chat", href: "/chat", current: false},
         ],
         userNavigation: [
-            {name: "Profile", href: "/profile", onClick: "#"},
+            {name: "My account", href: "/account", onClick: "#"},
             {name: "Settings", href: "/settings", onClick: "#"},
         ],
     }

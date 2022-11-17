@@ -2,15 +2,14 @@ import { useState } from 'react'
 import { Formik, Form, useFormikContext } from "formik"
 import { Persist } from 'formik-persist'
 import * as Yup from "yup";
-import TextInput from '@/components/forms/inputs/TextInput';
-
+import TextAreaInput from '@/components/forms/inputs/TextAreaInput';
 
 const yupValidationSchema = Yup.object().shape({
-    birthday: Yup
-    .date("Not a date")
-    .min(new Date(1900, 0, 1), "Too old")
-    .max(new Date(2010, 0, 1), "Too young")
-    .required("Date of birth is required")
+    bio: Yup
+    .string()
+    .min(150, "Please write at least 150 characters.")
+    .max(500, "You've exceeded the maximum character limit of 500.")
+    .required("A short bio is required")
 });
 
 const SoloStepSeven = (props) => {
@@ -19,16 +18,6 @@ const handleSubmit = (values) => {
     props.next(values);
 };
 
-const today = () => {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0');
-    var yyyy = today.getFullYear(); 
-    var todayFormatted = yyyy + '/' + mm + '/' + dd;
-    return todayFormatted
-}
-
-
 return (
     <>
     <Formik
@@ -36,16 +25,18 @@ return (
     initialValues={props.data}
     onSubmit={handleSubmit} 
     >  
-    {({values}) => (
+    {({values, setFieldValue}) => (
         <Form>
         <div className='my-16'>
             <div className='my-10'>
-            <TextInput 
-            name={"birthday"}
-            label={"Date of Birth"}
-            type="date"
-            min="1900/01/01"
-            max="2022/01/01"
+            <TextAreaInput 
+            name={"bio"}
+            label={"Bio"}
+            type="textarea"
+            message={values.bio}
+            setFieldValue={setFieldValue}
+            minLength={150}
+            maxLength={500}
             />
             </div>
         </div>

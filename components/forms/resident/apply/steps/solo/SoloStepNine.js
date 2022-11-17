@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, Fragment } from 'react'
 import { Formik, Form, FieldArray, useFormik } from "formik"
 import { Persist } from 'formik-persist'
 import * as Yup from "yup";
+import RadioInput from '@/components/forms/inputs/RadioInput';
 
 const groupOptions = [
     { id: 1, value: false, title: 'On my own', description: '' },
@@ -16,7 +17,7 @@ const groupOptions = [
     group: Yup
     .boolean()
     .required("Please select whether you will be renting alone or not"),
-  });
+});
 
 const SoloStepNine = (props) => {
 
@@ -36,13 +37,13 @@ return (
     {({values, errors, touched}) => (
 
         <Form autoComplete="off">
-        
-        <div className="flex-1 space-y-2 flex flex-col">
-            <p className="text-base text-gray-500">
-            Great news, we can pre-approve you right now for 
-            <span className='font-semibold text-indigo-500'> ${values.budget} / week</span>
-            !
-            </p>
+        <div className='my-10'>
+            <RadioInput 
+            name={"group"}
+            selected={props.data.group}
+            options={groupOptions}
+            requiredAsterisk
+            />
         </div>
 
         <div className='mt-8 flex justify-between'>
@@ -57,7 +58,7 @@ return (
             type={"submit"}
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-            Go to the last step
+            Next
             </button>
         </div>
         </Form>

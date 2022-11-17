@@ -13,8 +13,7 @@ import { trackUserIdentify } from "@/utils/segment/track";
 
 export default function Homes({data, headerContent}) {
     const { user, error } = useUser()
-    const profile = data.profile
-    const homes = data.homes
+    const {profile, homes, homeApplications} = data
 
     useEffect(() => {
       if (user && profile) {
@@ -35,7 +34,7 @@ export default function Homes({data, headerContent}) {
     return (
       <>  
         <DashboardHeader user={user} data={profile} headerContent={headerContent}/>
-        <CardGridHomes data={homes}/>
+        <CardGridHomes data={homes} homeApplications={homeApplications}/>
       </>
     )
 }
@@ -48,13 +47,35 @@ export const getServerSideProps = withPageAuth({
       .from('homes_listed')
       .select('*, homes_images(*)')
       .order('id', { ascending: false })
+
+      if (homesError) {
+        console.log(homesError);
+      } else {
+        console.log(homes);
+      }
+
+      const { data: homeApplications, error: homeApplicationsError } = await supabaseServerClient(ctx)
+      .from('home_applications')
+      .select('*')
+
+      if (homeApplicationsError) {
+        console.log(homeApplicationsError);
+      } else {
+        console.log(homeApplications);
+      }
       
       const { data: profile, error: profileError } = await supabaseServerClient(ctx)
       .from('profiles')
       .select('*')
       .single();
 
-      const data = {homes, profile}
+      if (profileError) {
+        console.log(profileError);
+      } else {
+        console.log(profile);
+      }
+
+      const data = {homes, homeApplications, profile}
 
       const navData = {
         navigation: [
@@ -64,7 +85,7 @@ export const getServerSideProps = withPageAuth({
             {name: "Homes", href: "/homes", current: true},
         ],
         userNavigation: [
-            {name: "Profile", href: "/profile", onClick: "#"},
+            {name: "My account", href: "/account", onClick: "#"},
             {name: "Settings", href: "/settings", onClick: "#"},
         ],
       }

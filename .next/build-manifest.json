@@ -15,11 +15,6 @@
   ],
   "rootMainFiles": [],
   "pages": {
-    "/": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/index.js"
-    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -30,15 +25,25 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/homes/[homeId]": [
+    "/account": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/homes/[homeId].js"
+      "static/chunks/pages/account.js"
     ],
-    "/resident/flatmates": [
+    "/homes": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/resident/flatmates.js"
+      "static/chunks/pages/homes.js"
+    ],
+    "/resident/apply/start": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/resident/apply/start.js"
+    ],
+    "/resident/dashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/resident/dashboard.js"
     ]
   },
   "ampFirstPages": []

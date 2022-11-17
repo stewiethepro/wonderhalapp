@@ -15,16 +15,21 @@ export default function SelectInput( props ) {
     const [field, meta, helpers] = useField(props.name)
     const { setValue } = helpers;
 
+    const selectedOption =  options.filter(function(option) {
+      return option.value == selected;
+    });
+    const selectedTitle = selectedOption.length > 0 ? selectedOption[0].title : ""
+
   return (
     <>
-    <div className="space-y-1 mt-4 input-wrapper">
+    <div className="space-y-1 mt-2 input-wrapper">
     <Listbox value={selected} onChange={setSelected} name={props.name}>
       {({ open }) => (
         <>
           <Listbox.Label className={`${props.requiredAsterisk && "after:content-['*'] after:ml-0.5 after:text-red-500"} block text-sm font-medium text-gray-700`}>{props.label}</Listbox.Label>
           <div className="mt-1 relative">
             <Listbox.Button className="bg-white relative w-full border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <span className="block truncate">{selected? selected : "Select " + props.label}</span>
+              <span className="block truncate">{selected? selectedTitle : "Select " + props.label}</span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </span>
@@ -49,7 +54,7 @@ export default function SelectInput( props ) {
                         'cursor-default select-none relative py-2 pl-3 pr-9'
                       )
                     }
-                  >
+                  > 
                     {({ selected, active }) => (
                       <>
                         <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>

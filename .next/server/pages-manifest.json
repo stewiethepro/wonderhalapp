@@ -3,5 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/api/auth/[...supabase]": "pages/api/auth/[...supabase].js",
-  "/api/auth/set-cookie": "pages/api/auth/set-cookie.js"
+  "/account": "pages/account.js",
+  "/homes": "pages/homes.js",
+  "/resident/dashboard": "pages/resident/dashboard.js"
 }

@@ -4,9 +4,9 @@ import { Persist } from 'formik-persist'
 import * as Yup from "yup";
 import RadioInput from '@/components/forms/inputs/RadioInput';
 
-const groupOptions = [
-    { id: 1, value: false, title: 'On my own', description: '' },
-    { id: 2, value: true, title: 'With others', description: '' },
+const hasPetsOptions = [
+    { id: 1, value: false, title: 'No', description: '' },
+    { id: 2, value: true, title: 'Yes', description: '' },
   ]
 
   function classNames(...classes) {
@@ -14,9 +14,9 @@ const groupOptions = [
   }
 
   const yupValidationSchema = Yup.object().shape({
-    group: Yup
+    hasPets: Yup
     .boolean()
-    .required("Please select whether you will be renting alone or not"),
+    .required("Please let us know whether you have any pets"),
 });
 
 const GroupStepEight = (props) => {
@@ -39,20 +39,13 @@ return (
         <Form autoComplete="off">
         <div className='my-10'>
             <RadioInput 
-            name={"group"}
-            selected={props.data.group}
-            options={groupOptions}
+            name={"hasPets"}
+            selected={props.data.hasPets}
+            options={hasPetsOptions}
             requiredAsterisk
             />
         </div>
 
-        {errors.homes && touched.homes && typeof errors.homes === "string" && 
-        <div>
-        <p className="mt-2 text-sm text-red-600">
-            {errors.homes}
-        </p>
-        </div>
-        }
         <div className='mt-8 flex justify-between'>
             <button
             type={"button"}

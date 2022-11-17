@@ -91,7 +91,7 @@ export const getServerSideProps = withPageAuth({
             {name: "Homes", href: "/homes", current: false},
         ],
         userNavigation: [
-            {name: "Profile", href: "/profile", onClick: "#"},
+            {name: "My account", href: "/account", onClick: "#"},
             {name: "Settings", href: "/settings", onClick: "#"},
         ],
     }

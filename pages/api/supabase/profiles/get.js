@@ -27,6 +27,7 @@ const handler = async (req, res) => {
         let userId = null
         let userStatus = null
         let userLastName = null
+        let userPets = null
         let userBudget = 0
     
         const { data: profile, error } = await serviceSupabase
@@ -46,9 +47,10 @@ const handler = async (req, res) => {
                     userId = profile[0].id
                     userStatus = profile[0].status
                     userLastName = profile[0].last_name
+                    userPets = profile[0].pets
                     userBudget = profile[0].budget
                 }
-            const result = {email: email, userExists: userExists, userId: userId, userStatus: userStatus, lastName: userLastName, budget: userBudget}
+            const result = {email: email, userExists: userExists, userId: userId, userStatus: userStatus, userPets: userPets, lastName: userLastName, budget: userBudget}
             console.log("profile: ", profile);
             console.log("result: ", result);
             return result

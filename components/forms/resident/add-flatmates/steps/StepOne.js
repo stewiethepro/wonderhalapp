@@ -34,12 +34,13 @@ const checkUser = async (request, values, props) => {
             console.log("API result: ", data);
 
             data.map((flatmate, index) => {
-                const {email, userExists, userId, userStatus, lastName, budget} = flatmate
+                const {email, userExists, userId, userStatus, userPets, lastName, budget} = flatmate
                 if (userExists) {
                     console.log(email + " is an existing user");
                     values.flatmates[index].userExists = true
                     values.flatmates[index].userId = userId
                     values.flatmates[index].userStatus = userStatus
+                    values.flatmates[index].userPets = userPets
                     values.flatmates[index].lastName = lastName
                     values.flatmates[index].budget = budget
                 } else {
@@ -133,10 +134,11 @@ return (
                                 userExists: false,
                                 userId: null,
                                 userStatus: null,
+                                userPets: null,
                                 budget: 0,
                             })
                         }} 
-                        className="inline-flex sm:w-1/3 items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm">
+                        className={`${values.flatmates.length === 0 && "mt-4"} inline-flex sm:w-1/3 items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm`}>
                             <span className='mr-4 text-indigo-500'>
                                 <PlusCircleIcon className="flex-shrink-0 h-6 w-6"/>
                             </span>

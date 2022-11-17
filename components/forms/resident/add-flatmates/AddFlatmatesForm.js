@@ -61,6 +61,7 @@ import Loader from '../../utility/Loader'
       userExists: false,
       userId: null,
       userStatus: null,
+      userPets: null,
       budget: 0,
     }],
     residentGroupId: residentGroupId,
@@ -99,6 +100,7 @@ import Loader from '../../utility/Loader'
         last_name: flatmate.lastName,
         email: flatmate.email,
         status: (flatmate.userExists ? flatmate.userStatus : "invited"),
+        pets: (flatmate.userExists ? flatmate.userPets : false),
         invited_by: userId,
         budget: flatmate.budget,
         }
@@ -119,6 +121,7 @@ import Loader from '../../utility/Loader'
             last_name: profileData.last_name,
             email: profileData.email,
             status: profileData.status,
+            pets: profileData.pets,
             budget: profileData.budget,
         } 
         : 
@@ -304,7 +307,16 @@ async function checkResidentGroupStatus(request) {
               let groupPreApproved = containsOnly(["pre-approved"], groupMemberStatus)
               console.log('groupPreApproved: ', groupPreApproved);
 
-              resolve(groupPreApproved)
+              let groupMemberPets = data.map((groupMember) => groupMember.pets)
+              console.log('groupMemberPets: ', groupMemberPets);
+
+              let groupPets = !containsOnly([false], groupMemberPets)
+              console.log('groupPets: ', groupPets);
+
+              resolve({
+                groupPreApproved: groupPreApproved,
+                groupPets: groupPets,
+              })
             }
 
         } catch (error) {
@@ -315,11 +327,12 @@ async function checkResidentGroupStatus(request) {
     })
 }
 
-async function updateResidentGroupStatus(groupApproved, residentGroupId) {
+async function updateResidentGroupStatus(groupApproved, groupPets, residentGroupId) {
     return new Promise(resolve => {
       (async () => {
         try {
             let groupStatus = ''
+            let groupHasPets = false
 
             if (groupApproved) {
                 groupStatus = 'pre-approved'
@@ -327,10 +340,19 @@ async function updateResidentGroupStatus(groupApproved, residentGroupId) {
                 groupStatus = 'not-approved'
             }
 
+            if (groupPets) {
+                groupHasPets = true
+            } else {
+                groupHasPets = false
+            }
+
             // Update resident group status
             const { data, error } = await supabase
             .from("resident_groups")
-            .update({ status: groupStatus })
+            .update({ 
+              status: groupStatus, 
+              pets: groupHasPets 
+            })
             .eq('id', residentGroupId)
 
             if (error) {
@@ -523,19 +545,21 @@ async function makeRequest(formData, userId, userEmail, profileData, residentGro
                 resolve(error)
             }
   
-            let groupApproved = false
+            let groupIsApproved = false
+            let groupHasPets = false
 
             try {
-                const result5 = await checkResidentGroupStatus(finalResidentGroupId);
-                console.log("result5: ", result5);
-                groupApproved = result5
+                const {groupPreApproved, groupPets} = await checkResidentGroupStatus(finalResidentGroupId);
+                console.log(groupPreApproved, groupPets);
+                groupIsApproved = groupPreApproved
+                groupHasPets = groupPets
             } catch (error) {
                 console.log("error: ", error);
                 resolve(error)
             }
   
             try {
-                const result6 = await updateResidentGroupStatus(groupApproved, finalResidentGroupId);
+                const result6 = await updateResidentGroupStatus(groupIsApproved, groupHasPets, finalResidentGroupId);
                 console.log("result6: ", result6);
             } catch (error) {
                 console.log("error: ", error);

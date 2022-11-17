@@ -4,9 +4,9 @@ import { Persist } from 'formik-persist'
 import * as Yup from "yup";
 import RadioInput from '@/components/forms/inputs/RadioInput';
 
-const inviteNowOptions = [
-    { id: 1, value: true, title: 'Invite now', description: '' },
-    { id: 2, value: false, title: 'Invite later', description: '' },
+const groupOptions = [
+    { id: 1, value: false, title: 'On my own', description: '' },
+    { id: 2, value: true, title: 'With others', description: '' },
   ]
 
   function classNames(...classes) {
@@ -14,9 +14,9 @@ const inviteNowOptions = [
   }
 
   const yupValidationSchema = Yup.object().shape({
-    inviteNow: Yup
+    group: Yup
     .boolean()
-    .required("Please choose whether you want to invite your flatmates now or later"),
+    .required("Please select whether you will be renting alone or not"),
 });
 
 const GroupStepTen = (props) => {
@@ -39,9 +39,9 @@ return (
         <Form autoComplete="off">
         <div className='my-10'>
             <RadioInput 
-            name={"inviteNow"}
-            selected={props.data.inviteNow}
-            options={inviteNowOptions}
+            name={"group"}
+            selected={props.data.group}
+            options={groupOptions}
             requiredAsterisk
             />
         </div>
