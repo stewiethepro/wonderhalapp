@@ -25,6 +25,7 @@ const handler = async (req, res) => {
         const { data, error } = await serviceSupabase
         .from("resident_groups")
         .insert([{ created_by: user_id }])
+        .select()
     
         if (error) {
             console.log("Supabase error:", error)

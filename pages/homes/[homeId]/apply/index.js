@@ -1,10 +1,9 @@
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link';
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import { Disclosure, RadioGroup, Tab } from '@headlessui/react'
 import {ShieldCheckIcon, HeartIcon, MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 import { pages } from '@/utils/segment/constants/pages';
@@ -15,8 +14,8 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Home({data}) {
-  const { user, error } = useUser();
+export default function Home({data, initialSession, sessionUser}) {
+  const user = useUser();
   const router = useRouter()
   const { homeId } = router.query
   const { homes, homeApplications, profile, residentGroups, flatmates } = data
@@ -55,78 +54,95 @@ export default function Home({data}) {
   )
 }
 
-export const getServerSideProps = withPageAuth({
-  redirectTo: '/auth/sign-in',
-  async getServerSideProps(ctx) {
-    const homeId = ctx.query.homeId
-    // Run queries with RLS on the server
-    const { data: homes, error: homesError } = await supabaseServerClient(ctx)
-    .from('homes_listed')
-    .select('*, homes_images(*)')
-    .eq('id', homeId)
+export const getServerSideProps = async (ctx) =>{
 
-    if (homesError) {
-      console.log(homesError);
-    } else {
-      console.log(homes);
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
     }
 
-    const { data: homeApplications, error: homeApplicationsError } = await supabaseServerClient(ctx)
-    .from('home_applications')
-    .select('*')
+  const initialSession = session
+  const sessionUser = session.user
+  const homeId = ctx.query.homeId
 
-    if (homeApplicationsError) {
-      console.log(homeApplicationsError);
-    } else {
-      console.log(homeApplications);
-    }
+  // Run queries with RLS on the server
+  const { data: homes, error: homesError } = await supabase
+  .from('homes_listed')
+  .select('*, homes_images(*)')
+  .eq('id', homeId)
 
-    // Run queries with RLS on the server
-    const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-    .from('profiles')
-    .select('*')
-    .single();
+  if (homesError) {
+    console.log(homesError);
+  } else {
+    console.log(homes);
+  }
 
-    if (profileError) {
-      console.log(profileError);
-    } else {
-      console.log(profile);
-    }
+  const { data: homeApplications, error: homeApplicationsError } = await supabase
+  .from('home_applications')
+  .select('*')
 
-    const { data: residentGroups, error: residentGroupsError } = await supabaseServerClient(ctx)
-    .from('resident_groups')
-    .select('*')
+  if (homeApplicationsError) {
+    console.log(homeApplicationsError);
+  } else {
+    console.log(homeApplications);
+  }
 
-    if (residentGroupsError) {
-      console.log(residentGroupsError);
-    } else {
-      console.log(residentGroups);
-    }
+  // Run queries with RLS on the server
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
 
-    const { data: flatmates, error: flatmatesError } = await supabaseServerClient(ctx)
-      .from('resident_group_members')
-      .select('*')
+  if (profileError) {
+    console.log(profileError);
+  } else {
+    console.log(profile);
+  }
 
-      if (flatmatesError) {
-        console.log(flatmatesError);
-      } else {
-        console.log(flatmates);
-      }
+  const { data: residentGroups, error: residentGroupsError } = await supabase
+  .from('resident_groups')
+  .select('*')
 
-    const data = { homes, homeApplications, profile, residentGroups, flatmates }
-  
-    const navData = {
-      navigation: [
-          {name: "Dashboard", href: "/resident/dashboard", current: false},
-          {name: "Apply", href: "/resident/apply", current: false},
-          {name: "Flatmates", href: "/resident/flatmates", current: false},
-          {name: "Homes", href: "/homes", current: true},
-      ],
-      userNavigation: [
-          {name: "My account", href: "/account", onClick: "#"},
-          {name: "Settings", href: "/settings", onClick: "#"},
-      ],
-    }
+  if (residentGroupsError) {
+    console.log(residentGroupsError);
+  } else {
+    console.log(residentGroups);
+  }
+
+  const { data: flatmates, error: flatmatesError } = await supabase
+  .from('resident_group_members')
+  .select('*')
+
+  if (flatmatesError) {
+    console.log(flatmatesError);
+  } else {
+    console.log(flatmates);
+  }
+
+  const data = { homes, homeApplications, profile, residentGroups, flatmates }
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/resident/dashboard", current: false},
+        {name: "Resident application", href: "/resident/apply", current: false},
+        {name: "Flatmates", href: "/resident/flatmates", current: false},
+        {name: "Homes", href: "/homes", current: true},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+  }
 
   const headerContent = {
     title: "Resident Application", 
@@ -136,9 +152,8 @@ export const getServerSideProps = withPageAuth({
 
   console.log(navData);
   
-    return { props: { data, navData, headerContent } };
-  }
-});
+  return { props: { data, navData, headerContent, initialSession, sessionUser } };
+}
 
 Home.getLayout = getLayout
 

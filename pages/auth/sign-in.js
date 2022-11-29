@@ -21,12 +21,12 @@ export default function SignIn() {
         let redirectLink = "https://dev.stayhamlet.com/welcome"
         {queryString? redirectLink = redirectLink + "?" + queryString : null }
 
-        const { data, error } = await supabase.auth.signIn(
+        const { data, error } = await supabase.auth.signInWithOtp(
             {
-              email: values.email
-            }, 
-            {
-            redirectTo: redirectLink,
+              email: values.email,
+              options: {
+                redirectTo: redirectLink
+              }
             }
         ) 
         if (error) {
@@ -44,12 +44,12 @@ export default function SignIn() {
         console.log(queryString)
         let redirectLink = "https://dev.stayhamlet.com/welcome"
         {queryString? redirectLink = redirectLink + "?" + queryString : null }
-        const { user, session, error } = await supabase.auth.signIn(
+        const { user, session, error } = await supabase.auth.signInWithOAuth(
             {
-              provider: 'google'
-            },
-            {
-              redirectTo: redirectLink,
+              provider: 'google',
+              options: {
+                redirectTo: redirectLink
+              }
             }
         )
         if (error) {

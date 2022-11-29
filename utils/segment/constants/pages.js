@@ -39,6 +39,52 @@ export const pages = {
                     },
                 },
             },
+            view: {
+                inPerson: {
+                    name: "Home View In-person",
+                    category: "Homes Page",
+                },
+                online: {
+                    index: {
+                        name: "Home View Online",
+                        category: "Homes Page",
+                    },
+                },
+            },
+            pay: {
+                bond: {
+                    approve: {
+                        name: "Home Pay Bond Approve",
+                        category: "Payment Page",
+                    },
+                    manual: {
+                        name: "Home Pay Bond Manual",
+                        category: "Payment Page",
+                    },
+                },
+                rent: {
+                    approve: {
+                        name: "Home Pay Rent Approve",
+                        category: "Payment Page",
+                    },
+                    manual: {
+                        name: "Home Pay Rent Manual",
+                        category: "Payment Page",
+                    },
+                },
+                authorise: {
+                    name: "Home Pay Authorise",
+                    category: "Payment Page",
+                },
+                complete: {
+                    name: "Home Pay Complete",
+                    category: "Payment Page",
+                },
+                success: {
+                    name: "Home Pay Success",
+                    category: "Payment Page",
+                },
+            },
             index: {
                 name: "Single Home",
                 category: "Homes Page",

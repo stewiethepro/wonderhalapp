@@ -25,8 +25,11 @@ import { post } from '@/utils/api/request'
   let {resident_group_id, resident_group_members_id} = query
   resident_group_id = resident_group_id ?? "" 
   resident_group_members_id = resident_group_members_id ?? "" 
-  const userId = user.id
-  const userEmail = user.email
+
+  if (user) {
+    const userId = user.id
+    const userEmail = user.email
+  }
 
   const [data, setData] = useState({
     userType: "",
@@ -49,6 +52,7 @@ import { post } from '@/utils/api/request'
             .from("profiles")
             .update(profilePayload)
             .eq('id', userId)
+            .select()
             
             if (error) {
                 console.log("Supabase error:", error)
@@ -192,7 +196,7 @@ async function handleFormSubmit(formData, userId, userEmail) {
   
     if (final) {
       setSubmitting(true);
-      handleFormSubmit(newData, userId, userEmail)
+      handleFormSubmit(newData, user.id, user.email)
     }
   
     setCurrentStep((prev) => prev + 1)

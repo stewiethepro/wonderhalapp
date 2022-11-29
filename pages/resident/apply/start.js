@@ -1,16 +1,14 @@
-import { supabase } from "@/utils/supabase";
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/router";
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import ResidentApplicationForm from "@/components/forms/resident/apply/ResidentApplicationForm";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 
-export default function ResidentApplyStart({data, navData, headerContent}) {
-    const { user, error } = useUser();
+export default function ResidentApplyStart({data, navData, headerContent, initialSession, sessionUser }) {
+    const user = useUser();
     const {profile, residentGroupMember} = data
 
     useEffect(() => {
@@ -36,51 +34,67 @@ export default function ResidentApplyStart({data, navData, headerContent}) {
     )
 }
 
-export const getServerSideProps = withPageAuth({
-    redirectTo: '/auth/sign-in',
-    async getServerSideProps(ctx) {
-      // Run queries with RLS on the server
-      const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-      .from('profiles')
-      .select('*')
-      .single();
-      
-      if (profileError) {
-        console.log(profileError);
-      } else {
-        console.log(profile);
-      }
+export const getServerSideProps = async (ctx) =>{
 
-      const { data: residentGroupMember, error: residentGroupMemberError } = await supabaseServerClient(ctx)
-      .from('resident_group_members')
-      .select()
-      .eq('user_id', profile.id)
-      .single();
-      
-      if (residentGroupMemberError) {
-        console.log(residentGroupMemberError);
-      } else {
-        console.log(residentGroupMember);
-      }
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-      const data = { profile, residentGroupMember }
-
-      const navData = {
-        navigation: [
-            {name: "Dashboard", href: "/resident/dashboard", current: false},
-            {name: "Apply", href: "/resident/apply", current: true},
-            {name: "Flatmates", href: "/resident/flatmates", current: false},
-            {name: "Homes", href: "/homes", current: false},
-        ],
-        userNavigation: [
-            {name: "My account", href: "/account", onClick: "#"},
-            {name: "Settings", href: "/settings", onClick: "#"},
-        ],
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
     }
 
-      return { props: { data , navData } };
-    }
-  });
+  const initialSession = session
+  const sessionUser = session.user
+
+  // Run queries with RLS on the server
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
+  
+  if (profileError) {
+    console.log(profileError);
+  } else {
+    console.log(profile);
+  }
+
+  const { data: residentGroupMember, error: residentGroupMemberError } = await supabase
+  .from('resident_group_members')
+  .select()
+  .eq('user_id', profile.id)
+  .single();
+  
+  if (residentGroupMemberError) {
+    console.log(residentGroupMemberError);
+  } else {
+    console.log(residentGroupMember);
+  }
+
+  const data = { profile, residentGroupMember }
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/resident/dashboard", current: false},
+        {name: "Resident application", href: "/resident/apply", current: true},
+        {name: "Flatmates", href: "/resident/flatmates", current: false},
+        {name: "Homes", href: "/homes", current: false},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+  }
+
+  return { props: { data , navData, initialSession, sessionUser } };
+}
 
 ResidentApplyStart.getLayout = getLayout;
 

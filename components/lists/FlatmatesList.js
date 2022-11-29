@@ -198,6 +198,7 @@ async function deleteResidentGroupMember(request) {
             .from('resident_group_members')
             .delete()
             .eq('id', request)
+            .select()
 
             if (error) {
                 console.log("Supabase error:", error)
@@ -327,6 +328,7 @@ async function updateResidentGroupStatus(groupApproved, request) {
                 .from("resident_groups")
                 .update({ status: 'pre-approved' })
                 .eq('id', request)
+                .select()
 
                 if (error) {
                 console.log("Supabase error:", error)
@@ -487,6 +489,7 @@ async function deleteResidentGroupMembers(request) {
             .from('resident_group_members')
             .delete()
             .eq('resident_group_id', request)
+            .select()
 
             if (error) {
                 console.log("Supabase error:", error)

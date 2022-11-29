@@ -25,25 +25,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/account": [
+    "/homeowner/dashboard-call-booked3": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/account.js"
+      "static/chunks/pages/homeowner/dashboard-call-booked3.js"
     ],
     "/homes": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/homes.js"
-    ],
-    "/resident/apply/start": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/resident/apply/start.js"
-    ],
-    "/resident/dashboard": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/resident/dashboard.js"
     ]
   },
   "ampFirstPages": []

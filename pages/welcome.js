@@ -1,5 +1,4 @@
-import { useUser } from '@supabase/auth-helpers-react';
-import { supabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser, useSessionContext } from '@supabase/auth-helpers-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Ripples } from '@uiball/loaders'
@@ -7,7 +6,8 @@ import { getLayout } from "@/components/layout/SiteLayout"
 import { pages } from '@/utils/segment/constants/pages';
 
 const Welcome = () => {
-  const { user } = useUser();
+  const { isLoading, session, error, supabaseClient } = useSessionContext();
+  const user = useUser();
   console.log("user: ", user);
   const [data, setData] = useState();
   const [count, setCount] = useState(0);

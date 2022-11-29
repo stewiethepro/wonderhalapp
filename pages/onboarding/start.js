@@ -1,12 +1,13 @@
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
+import { useEffect } from 'react';
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
 import OnboardingForm from "@/components/forms/onboarding/OnboardingForm";
 import { pages } from "@/utils/segment/constants/pages";
 
-export default function Onboarding ({data, user, navData}) {
-  
-const profile = data.profile
+export default function Onboarding ({data, navData, initialSession, sessionUser}) {
+  const user = useUser();
+  const profile = data.profile
 
   return (
     <>
@@ -15,33 +16,49 @@ const profile = data.profile
   )
 };
 
-export const getServerSideProps = withPageAuth({
-  redirectTo: '/auth/sign-in',
-  async getServerSideProps(ctx) {
-    // Run queries with RLS on the server
-    const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-    .from('profiles')
-    .select('*')
-    .single();
+export const getServerSideProps = async (ctx) =>{
 
-    const data = { profile }
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-    const navData = {
-      navigation: [
-          {name: "Dashboard", href: "/homeowner/dashboard", current: false},
-          {name: "Apply", href: "/homeowner/apply", current: true},
-          {name: "Discover", href: "/discover", current: false},
-          {name: "Chat", href: "/chat", current: false},
-      ],
-      userNavigation: [
-          {name: "My account", href: "/account", onClick: "#"},
-          {name: "Settings", href: "/settings", onClick: "#"},
-      ],
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
+    }
+
+  const initialSession = session
+  const sessionUser = session.user
+    
+  // Run queries with RLS on the server
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
+
+  const data = { profile }
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/homeowner/dashboard", current: false},
+        {name: "Apply", href: "/homeowner/apply", current: true},
+        {name: "Discover", href: "/discover", current: false},
+        {name: "Chat", href: "/chat", current: false},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
   }
 
-    return { props: { data, navData } };
-  }
-});
+  return { props: { data, navData, initialSession, sessionUser } };
+}
 
 Onboarding.getLayout = getLayout;
 

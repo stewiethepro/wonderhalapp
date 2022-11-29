@@ -32,14 +32,17 @@ import { CheckCircleIcon } from "@heroicons/react/20/solid";
                   className="w-full h-full object-center object-cover sm:w-full sm:h-full"
                 />
               </div>
-              <div className="flex-1 p-4 space-y-2 flex flex-col">
-                <h3 className="text-sm font-medium text-gray-900">
+              <div className="flex-1 p-4 space-y-1 flex flex-col">
+                <h3 className="text-sm font-semibold text-indigo-600">
                   <Link href={home.href}>
                   <a>
                     <span aria-hidden="true" className="absolute inset-0" />
-                    {home.title}
+                    {home.street_address}
                   </a>
                   </Link>
+                </h3>
+                <h3 className="text-sm font-medium text-gray-600">
+                  {home.title}
                 </h3>
                 {home.hasApplied &&
                   <div className="mt-2 flex items-center text-sm text-green-500">

@@ -36,6 +36,7 @@ const handler = async (req, res) => {
         .update(payload)
         .eq('id', resident_group_members_id)
         .eq('resident_group_id', resident_group_id)
+        .select()
     
         if (error) {
             console.log("Supabase error:", error)

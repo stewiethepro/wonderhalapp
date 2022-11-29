@@ -92,6 +92,8 @@ import SoloStepTest from './steps/solo/SoloStepTest'
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
 
+  console.log("profileData: ", profileData);
+
   if (user) {
     const userId = user.id
     const userEmail = user.email
@@ -250,6 +252,7 @@ async function createResidentApplication(residentApplicationPayload, residentGro
             .insert([
                 residentApplicationPayload
             ])
+            .select()
             
             if (error) {
                 console.log("Supabase error:", error)
@@ -281,6 +284,7 @@ async function updateResidentGroupMember(residentGroupMemberId, residentGroupId,
             })
             .eq('id', residentGroupMemberId)
             .eq('resident_group_id', residentGroupId)
+            .select()
 
             if (error) {
                 console.log("Supabase error:", error)
@@ -397,6 +401,7 @@ async function updateResidentGroupStatus(groupApproved, groupPets, residentGroup
               pets: groupHasPets, 
             })
             .eq('id', residentGroupId)
+            .select()
 
             if (error) {
             console.log("Supabase error:", error)
@@ -423,6 +428,7 @@ async function updateProfile(profilePayload, userId) {
             .from("profiles")
             .update(profilePayload)
             .eq('id', userId)
+            .select()
             
             if (error) {
                 console.log("Supabase error:", error)
@@ -594,6 +600,7 @@ async function createPets(petsPayload) {
           .insert(
             petsPayload
           )
+          .select()
 
           if (error) {
             console.log("Supabase error:", error)
@@ -686,6 +693,7 @@ async function createResidentNotInRegion(residentNotInRegionPayload) {
           .insert([
             residentNotInRegionPayload
           ])
+          .select()
 
             if (error) {
               console.log("Supabase error:", error)

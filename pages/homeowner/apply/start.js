@@ -1,15 +1,13 @@
-import { supabase } from "@/utils/supabase";
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import HomeownerApplicationForm from "@/components/forms/homeowner/apply/HomeownerApplicationForm";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 
-export default function HomeownerApplyStart({data, navData, headerContent}) {
-    const { user, error } = useUser();
+export default function HomeownerApplyStart({data, navData, headerContent, initialSession, sessionUser}) {
+    const user = useUser();
     const profile = data.profile
 
     useEffect(() => {
@@ -35,43 +33,59 @@ export default function HomeownerApplyStart({data, navData, headerContent}) {
     )
 }
 
-export const getServerSideProps = withPageAuth({
-    redirectTo: '/auth/sign-in',
-    async getServerSideProps(ctx) {
-      // Run queries with RLS on the server
-      const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-      .from('profiles')
-      .select('*')
-      .single();
+export const getServerSideProps = async (ctx) =>{
 
-      const data = { profile }
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-      const navData = {
-        navigation: [
-            {name: "Dashboard", href: "/homeowner/dashboard", current: false},
-            {name: "Apply", href: "/homeowner/apply", current: true},
-            {name: "Discover", href: "/discover", current: false},
-            {name: "Chat", href: "/chat", current: false},
-        ],
-        userNavigation: [
-            {name: "My account", href: "/account", onClick: "#"},
-            {name: "Settings", href: "/settings", onClick: "#"},
-        ],
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
     }
 
-      const headerContent = {
-        title: "Homeowner Application", 
-        main: "We just need a few details",
-        description: "This shouldn't take more than 5-10 mins, we've broken it up into nice little steps.",
-        button: {
-          title: "Start",
-          href: "/homeowner/apply/start",
-        }
-      }
+  const initialSession = session
+  const sessionUser = session.user
+  
+  // Run queries with RLS on the server
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
 
-      return { props: { data, navData, headerContent } };
+  const data = { profile }
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/homeowner/dashboard", current: false},
+        {name: "Apply", href: "/homeowner/apply", current: true},
+        {name: "Discover", href: "/discover", current: false},
+        {name: "Chat", href: "/chat", current: false},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+}
+
+  const headerContent = {
+    title: "Homeowner Application", 
+    main: "We just need a few details",
+    description: "This shouldn't take more than 5-10 mins, we've broken it up into nice little steps.",
+    button: {
+      title: "Start",
+      href: "/homeowner/apply/start",
     }
-  });
+  }
+
+  return { props: { data, navData, headerContent, initialSession, sessionUser } };
+}
 
   HomeownerApplyStart.getLayout = getLayout;
 

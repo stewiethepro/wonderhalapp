@@ -139,21 +139,22 @@ async function createHomeownerNotInRegion(locations) {
     return new Promise(resolve => {
       (async () => {
         try {
-            const { data, error } = await supabase
+          const { data, error } = await supabase
           .from("homeowners_not_in_region")
           .insert([
             { 
             locations: locations,
             }
           ])
+          .select()
 
-            if (error) {
-              console.log("Supabase error:", error)
-              resolve("Supabase error:", error)
-            } else {
-              console.log("homeowners_not_in_region: ", data);
-              resolve(data)
-            }
+          if (error) {
+            console.log("Supabase error:", error)
+            resolve("Supabase error:", error)
+          } else {
+            console.log("homeowners_not_in_region: ", data);
+            resolve(data)
+          }
 
         } catch (error) {
             console.log("API error: ", error);
@@ -167,21 +168,22 @@ async function createHomeownerApplication(locations) {
     return new Promise(resolve => {
       (async () => {
         try {
-            const { data, error } = await supabase
+          const { data, error } = await supabase
           .from("homeowner_applications")
           .insert([
             { 
             locations: locations,
             }
           ])
+          .select()
 
-            if (error) {
-              console.log("Supabase error:", error)
-              resolve("Supabase error:", error)
-            } else {
-              console.log("homeowner_applications: ", data);
-              resolve(data)
-            }
+          if (error) {
+            console.log("Supabase error:", error)
+            resolve("Supabase error:", error)
+          } else {
+            console.log("homeowner_applications: ", data);
+            resolve(data)
+          }
 
         } catch (error) {
             console.log("API error: ", error);
@@ -200,6 +202,7 @@ async function createHomes(homesPayload) {
             .insert(
               homesPayload
             )
+            .select()
 
             if (error) {
               console.log("Supabase error:", error)
@@ -225,6 +228,7 @@ async function updateProfile(profilePayload, userId) {
           .from("profiles")
           .update(profilePayload)
           .eq('id', userId)
+          .select()
           
           if (error) {
               console.log("Supabase error:", error)

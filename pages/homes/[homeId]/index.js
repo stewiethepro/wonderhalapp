@@ -1,12 +1,21 @@
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link';
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import { Disclosure, RadioGroup, Tab } from '@headlessui/react'
-import {ShieldCheckIcon, CheckCircleIcon, HeartIcon, MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
+import {
+  ShieldCheckIcon, 
+  CheckCircleIcon, 
+  HeartIcon, 
+  MinusSmallIcon, 
+  PlusSmallIcon 
+} from '@heroicons/react/24/outline'
+import { 
+  CalendarDaysIcon,
+  SparklesIcon,
+} from '@heroicons/react/20/solid'
 import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from '@/utils/segment/track';
 
@@ -14,8 +23,8 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Home({data}) {
-  const { user, error } = useUser();
+export default function Home({data, initialSession, sessionUser}) {
+  const user = useUser();
   const router = useRouter()
   const { homeId } = router.query
   const { profile, residentGroups, homeApplications, homes } = data
@@ -156,7 +165,12 @@ export default function Home({data}) {
             </div>
             
             <div className="mt-3">
-              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">{home.title}</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">{home.street_address}</h1>
+            </div>
+
+            <div className="mt-1">
+              <h2 className="sr-only">Home information</h2>
+              <p className="text-lg text-gray-900">{home.title}</p>
             </div>
 
             <div className="mt-3">
@@ -170,9 +184,37 @@ export default function Home({data}) {
               <p className="text-base text-gray-700 space-y-6">{home.description}</p>
             </div>
 
+            <div className='mt-10 flex justify-between'>
+              
+              <Link href={homeId + "/view/online/"}>
+                <button
+                  type="submit"
+                  className="w-full relative flex-1 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-full"
+                >
+                <span className="flex h-3 w-3">
+                  <span className="animate-ping absolute -top-1 -right-1 inline-flex h-3 w-3 rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="absolute -top-1 -right-1 inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                </span>
+                <SparklesIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-indigo-500" aria-hidden="true" />
+                  View online in 3D
+                </button>
+              </Link>
+
+              <Link href={homeId + "/view/in-person/"}>
+                <button
+                  type="submit"
+                  className="w-full flex-1 border border-transparent rounded-md ml-3 py-3 px-8 flex items-center justify-center text-base font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-full"
+                >
+                <CalendarDaysIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-indigo-500" aria-hidden="true" />
+                  Book a viewing
+                </button>
+              </Link>
+                
+            </div>
+
             {hasApplied ? 
             <>
-              <div className="mt-10 flex justify-center sm:flex-col1">
+              <div className="mt-5 flex justify-center sm:flex-col">
                 <Link href={homeId + "/apply/"}>
                   <button
                     type="submit"
@@ -189,12 +231,16 @@ export default function Home({data}) {
             </>
             : 
             <>
-              <div className="mt-10 flex justify-center sm:flex-col1">
+              <div className="mt-5 flex justify-center sm:flex-col1">
                 <Link href={homeId + "/apply/"}>
                   <button
                     type="submit"
                     className="w-full flex-1 bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500 sm:w-full"
                   >
+                    <CheckCircleIcon
+                      className="flex-shrink-0 mr-2 h-6 w-6 text-white group-hover:text-green-500"
+                      aria-hidden="true"
+                    />
                     One-click apply
                   </button>
                 </Link>
@@ -256,67 +302,85 @@ export default function Home({data}) {
   )
 }
 
-export const getServerSideProps = withPageAuth({
-  redirectTo: '/auth/sign-in',
-  async getServerSideProps(ctx) {
-    const homeId = ctx.query.homeId
-    // Run queries with RLS on the server
-    const { data: homes, error: homesError } = await supabaseServerClient(ctx)
-      .from('homes_listed')
-      .select('*, homes_images(*)')
-      .eq('id', homeId)
+export const getServerSideProps = async (ctx) =>{
 
-      if (homesError) {
-        console.log(homesError);
-      } else {
-        console.log(homes);
-      }
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-    const { data: homeApplications, error: homeApplicationsError } = await supabaseServerClient(ctx)
-    .from('home_applications')
-    .select('*')
-
-    if (homeApplicationsError) {
-      console.log(homeApplicationsError);
-    } else {
-      console.log(homeApplications);
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
     }
 
-    const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-    .from('profiles')
-    .select('*')
-    .single();
-
-    if (profileError) {
-      console.log(profileError);
-    } else {
-      console.log(profile);
-    }
-
-    const { data: residentGroups, error: residentGroupsError } = await supabaseServerClient(ctx)
-    .from('resident_groups')
-    .select('*')
-
-    if (residentGroupsError) {
-      console.log(residentGroupsError);
-    } else {
-      console.log(residentGroups);
-    }
-
-    const data = { homes, homeApplications, profile, residentGroups }
+  const initialSession = session
+  const sessionUser = session.user
   
-    const navData = {
-      navigation: [
-          {name: "Dashboard", href: "/resident/dashboard", current: false},
-          {name: "Apply", href: "/resident/apply", current: false},
-          {name: "Flatmates", href: "/resident/flatmates", current: false},
-          {name: "Homes", href: "/homes", current: true},
-      ],
-      userNavigation: [
-          {name: "My account", href: "/account", onClick: "#"},
-          {name: "Settings", href: "/settings", onClick: "#"},
-      ],
-    }
+  const homeId = ctx.query.homeId
+
+  // Run queries with RLS on the server
+  const { data: homes, error: homesError } = await supabase
+  .from('homes_listed')
+  .select('*, homes_images(*)')
+  .eq('id', homeId)
+
+  if (homesError) {
+    console.log(homesError);
+  } else {
+    console.log(homes);
+  }
+
+  const { data: homeApplications, error: homeApplicationsError } = await supabase
+  .from('home_applications')
+  .select('*')
+
+  if (homeApplicationsError) {
+    console.log(homeApplicationsError);
+  } else {
+    console.log(homeApplications);
+  }
+
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
+
+  if (profileError) {
+    console.log(profileError);
+  } else {
+    console.log(profile);
+  }
+
+  const { data: residentGroups, error: residentGroupsError } = await supabase
+  .from('resident_groups')
+  .select('*')
+
+  if (residentGroupsError) {
+    console.log(residentGroupsError);
+  } else {
+    console.log(residentGroups);
+  }
+
+  const data = { homes, homeApplications, profile, residentGroups }
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/resident/dashboard", current: false},
+        {name: "Resident application", href: "/resident/apply", current: false},
+        {name: "Flatmates", href: "/resident/flatmates", current: false},
+        {name: "Homes", href: "/homes", current: true},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+  }
 
   const headerContent = {
     title: "Resident Application", 
@@ -325,10 +389,9 @@ export const getServerSideProps = withPageAuth({
   }
 
   console.log(navData);
-  
-    return { props: { data, navData, headerContent } };
-  }
-});
+
+  return { props: { data, navData, headerContent, initialSession, sessionUser } };
+}
 
 Home.getLayout = getLayout
 

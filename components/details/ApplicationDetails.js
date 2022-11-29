@@ -56,6 +56,7 @@ import {
                 .from('home_applications')
                 .delete()
                 .eq('id', request)
+                .select()
     
                 if (error) {
                     console.log("Supabase error:", error)

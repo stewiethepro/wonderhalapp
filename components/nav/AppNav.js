@@ -4,7 +4,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, XCircleIcon } from '@heroicons/react/24/outline'
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/router";
-import { supabaseClient } from '@supabase/auth-helpers-nextjs'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import Link from 'next/link'
 import { useUser } from '@supabase/auth-helpers-react';
 import Courier from "@/components/notifications/Courier";
@@ -33,6 +33,7 @@ function classNames(...classes) {
 
 export default function AppNav({data, navData}) {
   const router = useRouter();
+  const supabaseClient = useSupabaseClient()
   const [navigation, setNavigation] = useState(defaultNavigation)
   const [userNavigation, setUserNavigation] = useState(defaultUserNavigation)
   const profile = data.profile
@@ -68,7 +69,7 @@ export default function AppNav({data, navData}) {
                         >
                           <a
                             className={classNames(
-                              router.asPath === item.href
+                              router.asPath.startsWith(item.href)
                                 ? 'border-indigo-500 text-indigo-600'
                                 : 'border-transparent text-gray-500 hover:border-indigo-500 hover:text-indigo-600',
                               'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
@@ -132,7 +133,11 @@ export default function AppNav({data, navData}) {
                           <Menu.Item key="signOut">
                                   {({ active }) => (
                                     <a
-                                      href="/api/auth/logout"
+                                      href="#"
+                                      onClick={async () => {
+                                        await supabaseClient.auth.signOut();
+                                        router.push('/auth/sign-in');
+                                      }}
                                       className={classNames(
                                         active ? 'bg-indigo-500 text-white' : 'text-gray-700',
                                         'block px-4 py-2 text-sm rounded-md'

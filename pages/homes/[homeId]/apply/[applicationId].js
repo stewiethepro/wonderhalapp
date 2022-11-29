@@ -1,10 +1,9 @@
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link';
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import { Disclosure, RadioGroup, Tab } from '@headlessui/react'
 import {ShieldCheckIcon, HeartIcon, MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 import ApplicationDetails from '@/components/details/ApplicationDetails';
@@ -15,8 +14,8 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Application({data}) {
-  const { user, error } = useUser();
+export default function Application({data, initialSession, sessionUser}) {
+  const user = useUser();
   const router = useRouter()
   const { homeId, applicationId } = router.query
   const { homes, homeApplications, profile, residentGroups, flatmates } = data
@@ -51,95 +50,111 @@ export default function Application({data}) {
   )
 }
 
-export const getServerSideProps = withPageAuth({
-  redirectTo: '/auth/sign-in',
-  async getServerSideProps(ctx) {
-    const homeId = ctx.query.homeId
-    const applicationId = ctx.query.applicationId
+export const getServerSideProps = async (ctx) =>{
 
-    // Run queries with RLS on the server
-    const { data: homes, error: homesError } = await supabaseServerClient(ctx)
-    .from('homes_listed')
-    .select('*, homes_images(*)')
-    .eq('id', homeId)
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-    if (homesError) {
-      console.log(homesError);
-    } else {
-      console.log(homes);
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
     }
 
-    const { data: homeApplications, error: homeApplicationsError } = await supabaseServerClient(ctx)
-    .from('home_applications')
-    .select('*')
-    .eq('id', applicationId)
+  const initialSession = session
+  const sessionUser = session.user
 
-    if (homeApplicationsError) {
-      console.log(homeApplicationsError);
-    } else {
-      console.log(homeApplications);
-    }
+  const homeId = ctx.query.homeId
+  const applicationId = ctx.query.applicationId
 
-    // Run queries with RLS on the server
-    const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-    .from('profiles')
-    .select('*')
-    .single();
+  // Run queries with RLS on the server
+  const { data: homes, error: homesError } = await supabase
+  .from('homes_listed')
+  .select('*, homes_images(*)')
+  .eq('id', homeId)
 
-    if (profileError) {
-      console.log(profileError);
-    } else {
-      console.log(profile);
-    }
-
-    const { data: residentGroups, error: residentGroupsError } = await supabaseServerClient(ctx)
-    .from('resident_groups')
-    .select('*')
-    .eq('id', homeApplications[0].resident_group_id)
-
-    if (residentGroupsError) {
-      console.log(residentGroupsError);
-    } else {
-      console.log(residentGroups);
-    }
-
-    const { data: flatmates, error: flatmatesError } = await supabaseServerClient(ctx)
-    .from('resident_group_members')
-    .select('*')
-    .eq('resident_group_id', homeApplications[0].resident_group_id)
-
-    if (flatmatesError) {
-      console.log(flatmatesError);
-    } else {
-      console.log(flatmates);
-    }
-
-    const data = { homes, homeApplications, profile, residentGroups, flatmates }
-  
-    const navData = {
-      navigation: [
-          {name: "Dashboard", href: "/resident/dashboard", current: false},
-          {name: "Apply", href: "/resident/apply", current: false},
-          {name: "Flatmates", href: "/resident/flatmates", current: false},
-          {name: "Homes", href: "/homes", current: true},
-      ],
-      userNavigation: [
-          {name: "My account", href: "/account", onClick: "#"},
-          {name: "Settings", href: "/settings", onClick: "#"},
-      ],
-    }
-
-    const headerContent = {
-      title: "Resident Application", 
-      main: "We just need a few details",
-      description: "This shouldn't take more than 5-10 mins, we've broken it up into nice little steps.",
-    }
-  
-    console.log(navData);
-
-    return { props: { data, navData, headerContent } };
+  if (homesError) {
+    console.log(homesError);
+  } else {
+    console.log(homes);
   }
-});
+
+  const { data: homeApplications, error: homeApplicationsError } = await supabase
+  .from('home_applications')
+  .select('*')
+  .eq('id', applicationId)
+
+  if (homeApplicationsError) {
+    console.log(homeApplicationsError);
+  } else {
+    console.log(homeApplications);
+  }
+
+  // Run queries with RLS on the server
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
+
+  if (profileError) {
+    console.log(profileError);
+  } else {
+    console.log(profile);
+  }
+
+  const { data: residentGroups, error: residentGroupsError } = await supabase
+  .from('resident_groups')
+  .select('*')
+  .eq('id', homeApplications[0].resident_group_id)
+
+  if (residentGroupsError) {
+    console.log(residentGroupsError);
+  } else {
+    console.log(residentGroups);
+  }
+
+  const { data: flatmates, error: flatmatesError } = await supabase
+  .from('resident_group_members')
+  .select('*')
+  .eq('resident_group_id', homeApplications[0].resident_group_id)
+
+  if (flatmatesError) {
+    console.log(flatmatesError);
+  } else {
+    console.log(flatmates);
+  }
+
+  const data = { homes, homeApplications, profile, residentGroups, flatmates }
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/resident/dashboard", current: false},
+        {name: "Resident application", href: "/resident/apply", current: false},
+        {name: "Flatmates", href: "/resident/flatmates", current: false},
+        {name: "Homes", href: "/homes", current: true},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+  }
+
+  const headerContent = {
+    title: "Resident Application", 
+    main: "We just need a few details",
+    description: "This shouldn't take more than 5-10 mins, we've broken it up into nice little steps.",
+  }
+
+  console.log(navData);
+
+  return { props: { data, navData, headerContent, initialSession, sessionUser } };
+}
 
 Application.getLayout = getLayout
 

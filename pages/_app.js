@@ -2,17 +2,16 @@ import '@/styles/globals.css'
 import { useState, useEffect } from 'react';
 import { Router, useRouter } from 'next/router';
 import { supabase } from '@/utils/supabase';
-import { UserProvider } from '@supabase/auth-helpers-react';
-import { supabaseClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { useUser } from '@supabase/auth-helpers-react';
 import Script from 'next/script'
 import * as snippet from '@segment/snippet'
 import { trackPage } from '@/utils/segment/track';
 import TransitionLoader from '@/components/loaders/TransitionLoader';
-import Lottie from "lottie-react";
-import loader from "@/lotties/loader.json";
 
 function MyApp({ Component, pageProps }) {
+  const [supabaseClient] = useState(() => createBrowserSupabaseClient())
   const [isLoading, setIsLoading] = useState(false);
   const [authenticatedState, setAuthenticatedState] = useState('not-authenticated')
   const router = useRouter()
@@ -22,7 +21,7 @@ function MyApp({ Component, pageProps }) {
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      handleAuthChange(event, session)
+      // handleAuthChange(event, session)
       if (event === 'SIGNED_IN') {
         setAuthenticatedState('authenticated')
       }
@@ -32,21 +31,22 @@ function MyApp({ Component, pageProps }) {
     })
     checkUser()
     return () => {
-      authListener.unsubscribe()
+      authListener.subscription.unsubscribe()
     }
   }, [])
 
-  async function handleAuthChange(event, session) {
-    await fetch('/api/auth/set-cookie', {
-      method: 'POST',
-      headers: new Headers({ 'Content-Type': 'application/json' }),
-      credentials: 'same-origin',
-      body: JSON.stringify({ event, session }),
-    })
-  }
+  // async function handleAuthChange(event, session) {
+  //   await fetch('/api/auth/set-cookie', {
+  //     method: 'POST',
+  //     headers: new Headers({ 'Content-Type': 'application/json' }),
+  //     credentials: 'same-origin',
+  //     body: JSON.stringify({ event, session }),
+  //   })
+  // }
 
   async function checkUser() {
-    const user = await supabase.auth.user()
+
+    const user = await supabase.auth.getUser()
     if (user) {
       setAuthenticatedState('authenticated')
     }
@@ -113,7 +113,7 @@ useEffect(() => {
 // ----- Render start ----- //
 
   return (
-    <UserProvider supabaseClient={supabaseClient}>
+    <SessionContextProvider supabaseClient={supabaseClient}>
       <Script dangerouslySetInnerHTML={{ __html: loadSegment() }} id="segment-script" />
       {isLoading ? 
       <>
@@ -126,7 +126,7 @@ useEffect(() => {
       )}
       </>
       }
-    </UserProvider>
+    </SessionContextProvider>
   );
 }
 

@@ -22,7 +22,8 @@ import {
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon } from '@heroicons/react/24/solid'
 import { useState, useContext } from 'react'
-import { supabaseClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from "next/router";
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import Link from 'next/link'
 
 
@@ -89,8 +90,10 @@ function classNames(...classes) {
 }
 
 export default function SiteNav() {
-    // const value = useContext(AuthContext);
-    // let authenticatedState = value.authenticatedState
+  const router = useRouter();
+  const supabaseClient = useSupabaseClient()
+  const user = useUser()
+
 
   return (
     <Popover className="relative bg-white">
@@ -98,7 +101,7 @@ export default function SiteNav() {
       <div className="relative z-20">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-5 sm:px-6 sm:py-4 lg:px-8 md:justify-start md:space-x-10">
           <div>
-            <a href="#" className="flex">
+            <a href="/" className="flex">
               <span className="sr-only">Workflow</span>
               <img
                 className="h-8 w-auto sm:h-10"
@@ -300,18 +303,22 @@ export default function SiteNav() {
               </Popover>
             </Popover.Group>
             <div className="flex items-center md:ml-12">
-            {/* {authenticatedState === "authenticated"? */}
+            {user ?
             <>
                 <a
-                    href="/api/auth/logout"
+                    href="#"
+                    onClick={async () => {
+                      await supabaseClient.auth.signOut();
+                      router.push('/auth/sign-in');
+                    }}
                     className="ml-8 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                     Sign out
                 </a>
             </>
-            {/* : */}
+            :
             <>
-                <a href="#" className="text-base font-medium text-gray-500 hover:text-gray-900">
+                <a href="/auth/sign-in" className="text-base font-medium text-gray-500 hover:text-gray-900">
                     Sign in
                 </a>
                 <a
@@ -321,7 +328,7 @@ export default function SiteNav() {
                     Sign up
                 </a>
             </>
-            {/* } */}
+            }
             </div>
           </div>
         </div>
@@ -417,7 +424,7 @@ export default function SiteNav() {
                 </a>
                 <p className="mt-6 text-center text-base font-medium text-gray-500">
                   Existing customer?{' '}
-                  <a href="#" className="text-indigo-600 hover:text-indigo-500">
+                  <a href="/auth/sign-in" className="text-indigo-600 hover:text-indigo-500">
                     Sign in
                   </a>
                 </p>

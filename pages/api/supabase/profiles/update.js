@@ -37,6 +37,7 @@ const handler = async (req, res) => {
             .from("profiles")
             .update(payload)
             .eq('id', user_id)
+            .select()
         
             if (error) {
             console.log("Supabase error:", error)

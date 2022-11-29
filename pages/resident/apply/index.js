@@ -1,10 +1,8 @@
-import { supabase, createResidentGroup } from "@/utils/supabase";
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/router";
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import CardGridOne from "@/components/cards/CardGridOne";
 import DashboardHeader from "@/components/header/DashboardHeader";
 import { pages } from "@/utils/segment/constants/pages";
@@ -30,8 +28,8 @@ const goToDashCard = {
   opacity: 'opacity-30',
 }
 
-export default function ResidentApply({data, navData, headerContent}) {
-    const { user, error } = useUser();
+export default function ResidentApply({data, navData, headerContent, initialSession, sessionUser}) {
+    const user = useUser();
     const profile = data.profile
 
     useEffect(() => {
@@ -72,48 +70,64 @@ export default function ResidentApply({data, navData, headerContent}) {
     )
 }
 
-export const getServerSideProps = withPageAuth({
-    redirectTo: '/auth/sign-in',
-    async getServerSideProps(ctx) {
-      // Run queries with RLS on the server
-      const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-      .from('profiles')
-      .select('*')
-      .single();
+export const getServerSideProps = async (ctx) =>{
 
-      const data = { profile }
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-      const navData = {
-        navigation: [
-            {name: "Dashboard", href: "/resident/dashboard", current: false},
-            {name: "Apply", href: "/resident/apply", current: true},
-            {name: "Flatmates", href: "/resident/flatmates", current: false},
-            {name: "Homes", href: "/homes", current: false},
-        ],
-        userNavigation: [
-            {name: "My account", href: "/account", onClick: "#"},
-            {name: "Settings", href: "/settings", onClick: "#"},
-        ],
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
     }
 
-    console.log(profile.status);
+  const initialSession = session
+  const sessionUser = session.user
+      
+  // Run queries with RLS on the server
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
 
-    const headerContent = (profile.status === 'prospect' || profile.status === 'not_in_region') ?  
-      {
-        title: "Resident Application", 
-        main: "We just need a few details",
-        description: "This shouldn't take more than 5-10 mins, we've broken it up into nice little steps.",
-      }
-      :
-      {
-        title: "Resident Application", 
-        main: "Thank you for your application 🤝",
-        description: "You can check on the status of your application in your dashboard.",
-      }
-    
-      return { props: { data, navData, headerContent } };
+  const data = { profile }
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/resident/dashboard", current: false},
+        {name: "Resident application", href: "/resident/apply", current: true},
+        {name: "Flatmates", href: "/resident/flatmates", current: false},
+        {name: "Homes", href: "/homes", current: false},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+  }
+
+  console.log(profile.status);
+
+  const headerContent = (profile.status === 'prospect' || profile.status === 'not_in_region') ?  
+    {
+      title: "Resident Application", 
+      main: "We just need a few details",
+      description: "This shouldn't take more than 5-10 mins, we've broken it up into nice little steps.",
     }
-  });
+    :
+    {
+      title: "Resident Application", 
+      main: "Thank you for your application 🤝",
+      description: "You can check on the status of your application on your dashboard.",
+    }
+
+  return { props: { data, navData, headerContent, initialSession, sessionUser } };
+}
 
 ResidentApply.getLayout = getLayout;
 

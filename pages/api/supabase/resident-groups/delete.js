@@ -26,6 +26,7 @@ const handler = async (req, res) => {
         .from("resident_groups")
         .delete()
         .eq('id', resident_group_id)
+        .select()
     
         if (error) {
             console.log("Supabase error:", error)

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 const courierClientKey = process.env.NEXT_PUBLIC_COURIER_CLIENT_KEY
 
 export default function Courier ({ children }) {
-  const { user } = useUser()
+  const user = useUser()
   const [loadCourier, setLoadCourier] = useState(false)
   
   const handleOnMessage = (message) => {

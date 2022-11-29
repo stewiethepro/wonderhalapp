@@ -354,6 +354,7 @@ async function updateResidentGroupStatus(groupApproved, groupPets, residentGroup
               pets: groupHasPets 
             })
             .eq('id', residentGroupId)
+            .select()
 
             if (error) {
             console.log("Supabase error:", error)

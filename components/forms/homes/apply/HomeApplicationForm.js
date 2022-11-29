@@ -222,6 +222,7 @@ async function createHomeApplication(homeApplicationPayload) {
             .insert([
                 homeApplicationPayload
             ])
+            .select()
             
             if (error) {
                 console.log("Supabase error:", error)

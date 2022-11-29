@@ -1,18 +1,16 @@
-import { supabase } from "../../utils/supabase";
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/router";
 import { getLayout } from "../../components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import CardGridHomes from "@/components/cards/CardGridHomes";
 import DashboardHeader from "@/components/header/DashboardHeader";
 import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from "@/utils/segment/track";
 
 
-export default function Homes({data, headerContent}) {
-    const { user, error } = useUser()
+export default function Homes({data, headerContent, initialSession, sessionUser}) {
+    const user = useUser()
     const {profile, homes, homeApplications} = data
 
     useEffect(() => {
@@ -39,67 +37,83 @@ export default function Homes({data, headerContent}) {
     )
 }
 
-export const getServerSideProps = withPageAuth({
-    redirectTo: '/auth/sign-in',
-    async getServerSideProps(ctx) {
-      // Run queries with RLS on the server
-      const { data: homes, error: homesError } = await supabaseServerClient(ctx)
-      .from('homes_listed')
-      .select('*, homes_images(*)')
-      .order('id', { ascending: false })
+export const getServerSideProps = async (ctx) =>{
 
-      if (homesError) {
-        console.log(homesError);
-      } else {
-        console.log(homes);
-      }
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-      const { data: homeApplications, error: homeApplicationsError } = await supabaseServerClient(ctx)
-      .from('home_applications')
-      .select('*')
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
+    }
 
-      if (homeApplicationsError) {
-        console.log(homeApplicationsError);
-      } else {
-        console.log(homeApplications);
-      }
+  const initialSession = session
+  const sessionUser = session.user
       
-      const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-      .from('profiles')
-      .select('*')
-      .single();
+  // Run queries with RLS on the server
+  const { data: homes, error: homesError } = await supabase
+  .from('homes_listed')
+  .select('*, homes_images(*)')
+  .order('id', { ascending: false })
 
-      if (profileError) {
-        console.log(profileError);
-      } else {
-        console.log(profile);
-      }
+  if (homesError) {
+    console.log(homesError);
+  } else {
+    console.log(homes);
+  }
 
-      const data = {homes, homeApplications, profile}
+  const { data: homeApplications, error: homeApplicationsError } = await supabase
+  .from('home_applications')
+  .select('*')
 
-      const navData = {
-        navigation: [
-            {name: "Dashboard", href: "/resident/dashboard", current: false},
-            {name: "Apply", href: "/resident/apply", current: false},
-            {name: "Flatmates", href: "/resident/flatmates", current: false},
-            {name: "Homes", href: "/homes", current: true},
-        ],
-        userNavigation: [
-            {name: "My account", href: "/account", onClick: "#"},
-            {name: "Settings", href: "/settings", onClick: "#"},
-        ],
-      }
+  if (homeApplicationsError) {
+    console.log(homeApplicationsError);
+  } else {
+    console.log(homeApplications);
+  }
+  
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
 
-    const headerContent = {
-      title: "Find your home", 
-      main: "Homes",
-      description: "Check out some of our Hamlet homes",
-      button: "",
-    }
+  if (profileError) {
+    console.log(profileError);
+  } else {
+    console.log(profile);
+  }
 
-      return { props: { data, navData, headerContent } };
-    }
-  });
+  const data = {homes, homeApplications, profile}
+
+  const navData = {
+    navigation: [
+        {name: "Dashboard", href: "/resident/dashboard", current: false},
+        {name: "Resident application", href: "/resident/apply", current: false},
+        {name: "Flatmates", href: "/resident/flatmates", current: false},
+        {name: "Homes", href: "/homes", current: true},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+  }
+
+  const headerContent = {
+    title: "Find your home", 
+    main: "Homes",
+    description: "Check out some of our Hamlet homes",
+    button: "",
+  }
+
+  return { props: { data, navData, headerContent, initialSession, sessionUser } };
+}
 
   Homes.getLayout = getLayout;
 

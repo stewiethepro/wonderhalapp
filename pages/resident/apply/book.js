@@ -1,18 +1,16 @@
-import { supabase } from "@/utils/supabase";
-import { supabaseClient, supabaseServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/router";
 import { getLayout } from "@/components/layout/AppLayout";
-import { withPageAuth, getUser } from '@supabase/auth-helpers-nextjs';
-import { useUser } from '@supabase/auth-helpers-react';
 import DashboardHeader from "@/components/header/DashboardHeader";
 import Calendly from "@/components/booking/Calendly";
 import CalScheduler from "@/components/booking/Cal";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 
-export default function HomeownerApplyBook({data, navData, headerContent}) {
-    const { user, error } = useUser();
+export default function ResidentApplyBook({data, navData, headerContent, initialSession, sessionUser}) {
+    const user = useUser();
     const profile = data.profile
 
   useEffect(() => {
@@ -40,41 +38,59 @@ export default function HomeownerApplyBook({data, navData, headerContent}) {
     )
 }
 
-export const getServerSideProps = withPageAuth({
-    redirectTo: '/auth/sign-in',
-    async getServerSideProps(ctx) {
-      // Run queries with RLS on the server
-      const { data: profile, error: profileError } = await supabaseServerClient(ctx)
-      .from('profiles')
-      .select('*')
-      .single();
+export const getServerSideProps = async (ctx) =>{
 
-      const data = { profile }
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-      const navData = {
-        navigation: [
-          {name: "Dashboard", href: "/resident/dashboard", current: false},
-          {name: "Apply", href: "/resident/apply", current: true},
-          {name: "Flatmates", href: "/resident/flatmates", current: false},
-          {name: "Homes", href: "/homes", current: false},
-        ],
-        userNavigation: [
-            {name: "My account", href: "/account", onClick: "#"},
-            {name: "Settings", href: "/settings", onClick: "#"},
-        ],
+  if (!session)
+    return {
+      redirect: {
+        destination: '/auth/sign-in',
+        permanent: false,
+      },
     }
 
-      const headerContent = {
-        title: "Hamlet intro", 
-        main: "Book an optional video call",
-        description: "If you have the time we'd love to meet you.",
-      }
+  const initialSession = session
+  const sessionUser = session.user
 
-      return { props: { data, navData, headerContent } };
-    }
-  });
+  // Run queries with RLS on the server
+  const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('*')
+  .single();
 
-  HomeownerApplyBook.getLayout = getLayout;
+  const data = { profile }
 
-  HomeownerApplyBook.pageName = pages.homeowner.apply.book.name
-  HomeownerApplyBook.pageCategory = pages.homeowner.apply.book.category
+  const navData = {
+    navigation: [
+      {name: "Dashboard", href: "/resident/dashboard", current: false},
+      {name: "Resident application", href: "/resident/apply", current: true},
+      {name: "Flatmates", href: "/resident/flatmates", current: false},
+      {name: "Homes", href: "/homes", current: false},
+    ],
+    userNavigation: [
+        {name: "My account", href: "/account", onClick: "#"},
+        {name: "Settings", href: "/settings", onClick: "#"},
+    ],
+  }
+
+  const headerContent = {
+    title: "Hamlet intro", 
+    main: "Book an optional video call",
+    description: "If you have the time we'd love to meet you.",
+  }
+
+  return { props: { data, navData, headerContent, initialSession, sessionUser } };
+
+}
+
+
+  ResidentApplyBook.getLayout = getLayout;
+
+  ResidentApplyBook.pageName = pages.resident.apply.book.name
+  ResidentApplyBook.pageCategory = pages.resident.apply.book.category
