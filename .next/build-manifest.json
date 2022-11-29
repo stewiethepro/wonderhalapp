@@ -25,10 +25,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/homeowner/dashboard-call-booked3": [
+    "/auth/sign-in": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/homeowner/dashboard-call-booked3.js"
+      "static/chunks/pages/auth/sign-in.js"
+    ],
+    "/homeowner/dashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/homeowner/dashboard.js"
     ],
     "/homes": [
       "static/chunks/webpack.js",
