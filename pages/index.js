@@ -202,7 +202,7 @@ export default function Index({data}) {
                 </div>
                 <div className="mt-6 sm:max-w-xl">
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-                     Renting that doesn't suck
+                     Wonderhal
                   </h1>
                   <p className="mt-6 text-xl text-gray-500">
                      Goodbye tenants and landlords, hello residents and homeowners.
