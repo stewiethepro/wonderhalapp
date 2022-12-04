@@ -6,6 +6,8 @@ import CardGridThree from "@/components/cards/CardGridThree";
 import DashboardHeader from "@/components/header/DashboardHeader";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 const cards = {
       primaryCard:
@@ -41,6 +43,7 @@ const cards = {
 export default function ResidentDashboard({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const { profile} = data
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
     useEffect(() => {
       if (user && profile) {
@@ -55,13 +58,18 @@ export default function ResidentDashboard({data, navData, headerContent, initial
         }
   
         trackUserIdentify(traits)
+
+        updateIntercom(user, profile, update)
+
       }
+
     }, [])
 
     return (
       <>  
         <DashboardHeader user={user} data={profile} headerContent={headerContent}/>
         <CardGridThree cards={cards}/>
+        {/* <button onClick={boot}>Boot intercom! ☎️</button> */}
       </>
     )
 }

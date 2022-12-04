@@ -10,6 +10,8 @@ import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from '@/utils/segment/track';
 import Matterport from '@/components/viewings/matterport';
 import DashboardHeader from '@/components/header/DashboardHeader';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -17,6 +19,7 @@ function classNames(...classes) {
 
 export default function ViewHomeOnline({data, headerContent, initialSession, sessionUser}) {
   const user = useUser();
+  const { boot, shutdown, hide, show, update } = useIntercom();
   const { profile, homes } = data
   const home = homes[0]
 
@@ -33,6 +36,9 @@ export default function ViewHomeOnline({data, headerContent, initialSession, ses
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+
     }
   }, [])
 

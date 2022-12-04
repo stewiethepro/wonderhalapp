@@ -8,10 +8,13 @@ import Calendly from "@/components/booking/Calendly";
 import CalScheduler from "@/components/booking/Cal";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 export default function ResidentApplyBook({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const profile = data.profile
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
   useEffect(() => {
     if (user && profile) {
@@ -26,6 +29,9 @@ export default function ResidentApplyBook({data, navData, headerContent, initial
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+      
     }
   }, [])
 

@@ -6,10 +6,13 @@ import DashboardHeader from "@/components/header/DashboardHeader";
 import FlatmatesList from '@/components/lists/FlatmatesList';
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 export default function Flatmates({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const { profile, flatmates, residentGroups } = data
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
     console.log(flatmates, residentGroups);
 
@@ -26,6 +29,9 @@ export default function Flatmates({data, navData, headerContent, initialSession,
         }
   
         trackUserIdentify(traits)
+
+        updateIntercom(user, profile, update)
+        
       }
     }, [])
 

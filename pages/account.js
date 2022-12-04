@@ -8,10 +8,13 @@ import DashboardHeader from "@/components/header/DashboardHeader";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 import AccountProfileForm from '@/components/forms/account/AccountProfileForm';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 export default function ResidentProfile({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const { profile } = data
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
     useEffect(() => {
       if (user && profile) {
@@ -26,6 +29,9 @@ export default function ResidentProfile({data, navData, headerContent, initialSe
         }
   
         trackUserIdentify(traits)
+
+        updateIntercom(user, profile, update)
+        
       }
     }, [])
 

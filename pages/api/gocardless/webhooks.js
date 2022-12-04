@@ -5,7 +5,7 @@ const webhookEndpointSecret = process.env.GO_CARDLESS_WEBHOOK_SECRET;
 export const config = {
     api: {
       bodyParser: {
-        type: textjson
+        sizeLimit: '500kb',
       },
     },
   }

@@ -8,11 +8,14 @@ import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 import { get, post } from '@/utils/api/request';
 import { resolveHref } from 'next/dist/shared/lib/router/router';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 
 export default function PayAuthorise({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const profile = data.profile
+    const { boot, shutdown, hide, show, update } = useIntercom();
     const customer = {
         given_name: profile.first_name,
         family_name: profile.last_name,
@@ -33,6 +36,9 @@ export default function PayAuthorise({data, navData, headerContent, initialSessi
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+
     }
   }, [])
 
@@ -51,7 +57,7 @@ export default function PayAuthorise({data, navData, headerContent, initialSessi
     return new Promise(resolve => {
       (async () => {
         try {
-            await post('/api/gocardless/customers/get', request).then((result) => {
+            await get('/api/gocardless/customers/get', request).then((result) => {
                 const data = result;
                 console.log("API result: ", data);
                 resolve(data);

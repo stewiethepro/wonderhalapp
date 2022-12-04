@@ -7,11 +7,14 @@ import CardGridHomes from "@/components/cards/CardGridHomes";
 import DashboardHeader from "@/components/header/DashboardHeader";
 import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from "@/utils/segment/track";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 
 export default function Homes({data, headerContent, initialSession, sessionUser}) {
     const user = useUser()
     const {profile, homes, homeApplications} = data
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
     useEffect(() => {
       if (user && profile) {
@@ -26,6 +29,9 @@ export default function Homes({data, headerContent, initialSession, sessionUser}
         }
   
         trackUserIdentify(traits)
+        
+        updateIntercom(user, profile, update)
+        
       }
     }, [])
 

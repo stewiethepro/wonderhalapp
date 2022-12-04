@@ -9,6 +9,9 @@ import Script from 'next/script'
 import * as snippet from '@segment/snippet'
 import { trackPage } from '@/utils/segment/track';
 import TransitionLoader from '@/components/loaders/TransitionLoader';
+import { IntercomProvider, useIntercom } from 'react-use-intercom';
+
+const INTERCOM_APP_ID = 'ykoek7lm';
 
 function MyApp({ Component, pageProps }) {
   const [supabaseClient] = useState(() => createBrowserSupabaseClient())
@@ -114,18 +117,23 @@ useEffect(() => {
 
   return (
     <SessionContextProvider supabaseClient={supabaseClient}>
-      <Script dangerouslySetInnerHTML={{ __html: loadSegment() }} id="segment-script" />
-      {isLoading ? 
-      <>
-      <TransitionLoader />
-      </>
-      :
-      <>
-      {getLayout(
-        <Component {...pageProps} />, pageProps
-      )}
-      </>
-      }
+      <IntercomProvider 
+        appId={INTERCOM_APP_ID} 
+        autoBoot
+      >
+        <Script dangerouslySetInnerHTML={{ __html: loadSegment() }} id="segment-script" />
+        {isLoading ? 
+        <>
+        <TransitionLoader />
+        </>
+        :
+        <>
+        {getLayout(
+          <Component {...pageProps} />, pageProps
+        )}
+        </>
+        }
+      </IntercomProvider>
     </SessionContextProvider>
   );
 }

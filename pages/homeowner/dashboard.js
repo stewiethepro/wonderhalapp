@@ -7,6 +7,8 @@ import DashboardHeader from '@/components/header/DashboardHeader';
 import CardGridThree from "@/components/cards/CardGridThree";
 import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from '@/utils/segment/track';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 const cards = {
   primaryCard:
@@ -42,6 +44,8 @@ const cards = {
 export default function HomeownerDashboard({data, headerContent, initialSession, sessionUser}) {
   const user = useUser();
   const profile = data.profile
+  const { boot, shutdown, hide, show, update } = useIntercom();
+
 
   useEffect(() => {
     if (user && profile) {
@@ -56,6 +60,9 @@ export default function HomeownerDashboard({data, headerContent, initialSession,
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+
     }
   }, [])
 

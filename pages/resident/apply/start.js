@@ -6,10 +6,13 @@ import { getLayout } from "@/components/layout/AppLayout";
 import ResidentApplicationForm from "@/components/forms/resident/apply/ResidentApplicationForm";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 export default function ResidentApplyStart({data, navData, headerContent, initialSession, sessionUser }) {
     const user = useUser();
     const {profile, residentGroupMember} = data
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
     useEffect(() => {
       if (user && profile) {
@@ -24,6 +27,9 @@ export default function ResidentApplyStart({data, navData, headerContent, initia
         }
   
         trackUserIdentify(traits)
+
+        updateIntercom(user, profile, update)
+        
       }
     }, [])
 

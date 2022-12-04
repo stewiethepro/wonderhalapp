@@ -9,6 +9,8 @@ import CalScheduler from "@/components/booking/Cal";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 import CardGridOne from '@/components/cards/CardGridOne';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 const card = {
   name: 'Arrange Setup',
@@ -23,6 +25,8 @@ const card = {
 export default function HomeownerImprove({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const profile = data.profile
+    const { boot, shutdown, hide, show, update } = useIntercom();
+
 
   useEffect(() => {
 
@@ -38,6 +42,9 @@ export default function HomeownerImprove({data, navData, headerContent, initialS
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+
     }
   }, [])
 

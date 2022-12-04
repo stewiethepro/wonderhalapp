@@ -7,6 +7,8 @@ import CardGridOne from "@/components/cards/CardGridOne";
 import DashboardHeader from "@/components/header/DashboardHeader";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 const card = {
   name: 'Start Application',
@@ -21,6 +23,7 @@ const card = {
 export default function HomeownerApply({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const profile = data.profile
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
   useEffect(() => {
     if (user && profile) {
@@ -35,6 +38,9 @@ export default function HomeownerApply({data, navData, headerContent, initialSes
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+      
     }
   }, [])
 

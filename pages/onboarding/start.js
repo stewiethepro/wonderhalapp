@@ -4,10 +4,22 @@ import { useEffect } from 'react';
 import { getLayout } from "@/components/layout/AppLayout";
 import OnboardingForm from "@/components/forms/onboarding/OnboardingForm";
 import { pages } from "@/utils/segment/constants/pages";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 export default function Onboarding ({data, navData, initialSession, sessionUser}) {
   const user = useUser();
   const profile = data.profile
+  const { boot, shutdown, hide, show, update } = useIntercom();
+
+  useEffect(() => {
+    if (user) {
+      
+      updateIntercom(user, profile, update)
+      
+    }
+  }, [])
+
 
   return (
     <>

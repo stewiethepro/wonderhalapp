@@ -8,6 +8,9 @@ import DashboardHeader from "@/components/header/DashboardHeader";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 import { get, post } from "@/utils/api/request";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
+
 
 const applyCard = {
   name: 'Start Application',
@@ -31,10 +34,10 @@ const goToDashCard = {
 export default function ResidentApply({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const profile = data.profile
+    const { boot, shutdown, hide, show, update } = useIntercom();
 
     useEffect(() => {
       if (user && profile) {
-        console.log("user and profile")
 
         const traits = {
           id: user.id, 
@@ -44,9 +47,13 @@ export default function ResidentApply({data, navData, headerContent, initialSess
           last_name: profile.last_name,
           user_type: profile.user_type
         }
-
+  
         trackUserIdentify(traits)
+
+        updateIntercom(user, profile, update)
+
       }
+
     }, [])
 
     return (

@@ -9,12 +9,13 @@ import Calendly from "@/components/booking/Calendly";
 import CalScheduler from "@/components/booking/Cal";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
-import { 
-  SparklesIcon,
-} from '@heroicons/react/20/solid'
+import { SparklesIcon } from '@heroicons/react/20/solid'
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 export default function ViewHomeInPerson({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
+    const { boot, shutdown, hide, show, update } = useIntercom();
     const { homes, profile } = data
     const home = homes[0]
     const homeId = home.id
@@ -33,6 +34,9 @@ export default function ViewHomeInPerson({data, navData, headerContent, initialS
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+      
     }
   }, [])
 

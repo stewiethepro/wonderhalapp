@@ -14,7 +14,7 @@ export const config = {
   };
   
   const handler = async (req, res) => {
-    if (req.method === "POST") {
+    if (req.method === "GET") {
         try {
             const data = await getGoCardlessCustomer()
             console.log(data);

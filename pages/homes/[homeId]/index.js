@@ -18,6 +18,8 @@ import {
 } from '@heroicons/react/20/solid'
 import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from '@/utils/segment/track';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -25,6 +27,7 @@ function classNames(...classes) {
 
 export default function Home({data, initialSession, sessionUser}) {
   const user = useUser();
+  const { boot, shutdown, hide, show, update } = useIntercom();
   const router = useRouter()
   const { homeId } = router.query
   const { profile, residentGroups, homeApplications, homes } = data
@@ -56,6 +59,9 @@ export default function Home({data, initialSession, sessionUser}) {
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+      
     }
   }, [])
   

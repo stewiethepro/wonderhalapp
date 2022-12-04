@@ -5,10 +5,14 @@ import { getLayout } from "@/components/layout/AppLayout";
 import HomeownerApplicationForm from "@/components/forms/homeowner/apply/HomeownerApplicationForm";
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 export default function HomeownerApplyStart({data, navData, headerContent, initialSession, sessionUser}) {
     const user = useUser();
     const profile = data.profile
+    const { boot, shutdown, hide, show, update } = useIntercom();
+
 
     useEffect(() => {
       if (user && profile) {
@@ -23,6 +27,9 @@ export default function HomeownerApplyStart({data, navData, headerContent, initi
         }
 
         trackUserIdentify(traits)
+
+        updateIntercom(user, profile, update)
+        
       }
     }, [])
 

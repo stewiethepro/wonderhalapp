@@ -8,6 +8,9 @@ import ResidentApplicationForm from "@/components/forms/resident/apply/ResidentA
 import { pages } from "@/utils/segment/constants/pages";
 import { trackUserIdentify } from "@/utils/segment/track";
 import dynamic from 'next/dynamic';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
+import Persona from '@/components/verify/Persona';
 // import UploadInput from '@/components/forms/inputs/DropzoneUploadInput';
 // import UploadInput from '@/components/forms/inputs/FilePondUploadInput';
 // import UploadInput from '@/components/forms/inputs/UploadInput';
@@ -15,8 +18,7 @@ import dynamic from 'next/dynamic';
 // import UploadCareInput from '@/components/forms/inputs/UploadCareInput';
 // import UploadInput from '@/components/forms/inputs/UploadIoInput';
 // import { Widget } from "@uploadcare/react-widget";
-import Passbase from '@/components/verify/Passbase';
-import Persona from '@/components/verify/Persona';
+// import Passbase from '@/components/verify/Passbase';
 // import { post } from '@/utils/api/request'
 // import { getAccessToken } from '@/utils/sumsub';
 
@@ -31,6 +33,8 @@ export default function Verify({data, navData, headerContent, initialSession, se
     const supabase = useSupabaseClient()
     const user = useUser();
     const {profile, id, residentGroupMember} = data
+    const { boot, shutdown, hide, show, update } = useIntercom();
+
     const [loading, setLoading] = useState(false)
     console.log(id);
 
@@ -47,6 +51,9 @@ export default function Verify({data, navData, headerContent, initialSession, se
         }
   
         trackUserIdentify(traits)
+
+        updateIntercom(user, profile, update)
+        
       }
     }, [])
 

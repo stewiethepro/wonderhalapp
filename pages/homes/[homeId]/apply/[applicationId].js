@@ -9,6 +9,8 @@ import {ShieldCheckIcon, HeartIcon, MinusSmallIcon, PlusSmallIcon } from '@heroi
 import ApplicationDetails from '@/components/details/ApplicationDetails';
 import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from '@/utils/segment/track';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -16,6 +18,7 @@ function classNames(...classes) {
 
 export default function Application({data, initialSession, sessionUser}) {
   const user = useUser();
+  const { boot, shutdown, hide, show, update } = useIntercom();
   const router = useRouter()
   const { homeId, applicationId } = router.query
   const { homes, homeApplications, profile, residentGroups, flatmates } = data
@@ -38,6 +41,9 @@ export default function Application({data, initialSession, sessionUser}) {
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+
     }
   }, [])
 

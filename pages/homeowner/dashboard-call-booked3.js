@@ -10,6 +10,8 @@ import CardGridThree from "@/components/cards/CardGridThree";
 import { pages } from '@/utils/segment/constants/pages';
 import { trackUserIdentify } from '@/utils/segment/track';
 import DashboardLayout3 from '@/components/layout/DashboardLayout3';
+import { useIntercom } from 'react-use-intercom';
+import { updateIntercom } from '@/utils/intercom';
 
 const cards = {
   actionCards: [
@@ -46,6 +48,7 @@ const cards = {
 export default function HomeownerDashboard({data, headerContent}) {
   const user = useUser();
   const profile = data.profile
+  const { boot, shutdown, hide, show, update } = useIntercom();
 
   useEffect(() => {
     if (user && profile) {
@@ -60,6 +63,9 @@ export default function HomeownerDashboard({data, headerContent}) {
       }
 
       trackUserIdentify(traits)
+
+      updateIntercom(user, profile, update)
+
     }
   }, [])
 
